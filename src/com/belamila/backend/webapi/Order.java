@@ -23,15 +23,15 @@ public class Order {
         receiver.put("contact_person", p.getReceiver().split(" ", 2)[0]);
         receiver.put("email", p.getEmail());
         receiver.put("phone", p.getPhone());
-        json.getJSONObject("address").put("receiver", receiver);
 
         if (p.getService().equals("INPOST")) {
-            receiver.put("line1", p.getInpostId());
+            receiver.put("foreign_address_id", p.getInpostId());
         } else {
             receiver.put("line1", p.getAddress());
             receiver.put("postal_code", p.getZip());
         }
 
+        json.getJSONObject("address").put("receiver", receiver);
         return json;
     }
 

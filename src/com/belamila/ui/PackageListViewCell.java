@@ -1,8 +1,10 @@
 package com.belamila.ui;
 
 import com.belamila.model.Package;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.TextField;
@@ -24,6 +26,10 @@ public class PackageListViewCell extends ListCell<Package> {
 
     private static final Logger logger = LoggerFactory.getLogger(PackageListViewCell.class);
 
+    private ObservableList<Package> packageObservableList;
+
+    @FXML
+    private Button remove;
     @FXML
     private Label id;
     @FXML
@@ -37,6 +43,10 @@ public class PackageListViewCell extends ListCell<Package> {
     private GridPane gridPane;
 
     private FXMLLoader mLLoader;
+
+    public PackageListViewCell(ObservableList<Package> packageObservableList) {
+        this.packageObservableList = packageObservableList;
+    }
 
     @SneakyThrows
     @Override
@@ -60,6 +70,8 @@ public class PackageListViewCell extends ListCell<Package> {
                     e.printStackTrace();
                 }
             }
+
+            remove.setOnAction(event -> packageObservableList.remove(p));
 
             id.setText(p.getId());
             receiver.setText(p.getReceiver());

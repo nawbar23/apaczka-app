@@ -107,7 +107,8 @@ public class AcceptanceWindow implements Initializable {
             logger.info("Initialize: {}", packages);
             packageObservableList.addAll(packages);
             listView.setItems(packageObservableList);
-            listView.setCellFactory(studentListView -> new PackageListViewCell());
+            listView.setCellFactory(studentListView ->
+                    new PackageListViewCell(packageObservableList));
         });
     }
 }

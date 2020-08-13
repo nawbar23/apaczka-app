@@ -1,6 +1,7 @@
 package com.belamila.backend.webapi;
 
 import com.belamila.model.Package;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
@@ -71,24 +72,18 @@ public class Order {
         pickup.put("type", "SELF");
         template.put("pickup", pickup);
 
-        JSONObject shipment = new JSONObject();
-        shipment.put("dimension1", 20);
-        shipment.put("dimension2", 15);
-        shipment.put("dimension3", 5);
-        shipment.put("weight", 0.5);
-        shipment.put("shipment_type_code", "PACZKA");
+        JSONArray shipment = new JSONArray();
+        JSONObject shipElement = new JSONObject();
+        shipElement.put("dimension1", 20);
+        shipElement.put("dimension2", 15);
+        shipElement.put("dimension3", 5);
+        shipElement.put("weight", 0.5);
+        shipElement.put("shipment_type_code", "PACZKA");
+        shipment.put(shipElement);
         template.put("shipment", shipment);
 
         template.put("comment", "Say hello to your new BELAMILA!");
         template.put("content", "BELAMILA.PL");
-
-        JSONObject option = new JSONObject();
-        //template.put("option", option);
-
-        JSONObject cod = new JSONObject();
-        //template.put("cod", cod);
-
-        //template.put("shipment_value", 0);
 
         return template;
     }

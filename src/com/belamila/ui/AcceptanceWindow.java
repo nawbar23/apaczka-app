@@ -27,6 +27,8 @@ public class AcceptanceWindow {
 
     public Result verify(List<Package> packages) throws Exception {
         // TODO https://stackoverflow.com/questions/19588029/customize-listview-in-javafx-with-fxml
+        // TODO https://www.turais.de/how-to-custom-listview-cell-in-javafx/
+
         Platform.runLater(() -> {
             try {
                 URL url = new File("src/com/belamila/ui/fxml/acceptance_window.fxml").toURI().toURL();

@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -49,6 +50,7 @@ public class AcceptanceWindow implements Initializable {
 
     private static final Boolean condition = true;
     private static Result result;
+    private static List<Package> packagesResult;
 
     public AcceptanceWindow() {
         packageObservableList = FXCollections.observableArrayList();
@@ -85,24 +87,14 @@ public class AcceptanceWindow implements Initializable {
         }
 
         packages.clear();
-
+        packages.addAll(packagesResult);
         return result;
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        buttonWebApi.setOnAction(event -> {
-            result = Result.WEB_API;
-            synchronized (condition) {
-                condition.notify();
-            }
-        });
-        buttonExcel.setOnAction(event -> {
-            result = Result.EXCEL;
-            synchronized (condition) {
-                condition.notify();
-            }
-        });
+        buttonWebApi.setOnAction(event -> onFinished(Result.WEB_API));
+        buttonExcel.setOnAction(event -> onFinished(Result.EXCEL));
         Platform.runLater(() -> {
             logger.info("Initialize: {}", packages);
             packageObservableList.addAll(packages);
@@ -110,5 +102,13 @@ public class AcceptanceWindow implements Initializable {
             listView.setCellFactory(studentListView ->
                     new PackageListViewCell(packageObservableList));
         });
+    }
+
+    private void onFinished(Result excel) {
+        result = excel;
+        packagesResult = new ArrayList<>(packageObservableList);
+        synchronized (condition) {
+            condition.notify();
+        }
     }
 }

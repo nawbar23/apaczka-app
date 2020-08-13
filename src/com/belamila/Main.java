@@ -91,7 +91,7 @@ public class Main extends Application {
 
     private String executeLogic(File file) throws Exception {
         List<Package> packages = new Parser().parse(file);
-        AcceptanceWindow.Result result = new AcceptanceWindow().verify(packages);
+        AcceptanceWindow.Result result = AcceptanceWindow.verify(packages);
         logger.info("Acceptance result: {}, packages: {}", result, packages);
         switch (result) {
             case EXCEL:

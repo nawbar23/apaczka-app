@@ -40,6 +40,7 @@ public class CsvReader {
             String service = parseService(val.get(20));
             if (service != null) {
                 Package pack = Package.builder()
+                        .id(val.get(0))
                         .service(service)
                         .receiver(val.get(10))
                         .address(val.get(15))

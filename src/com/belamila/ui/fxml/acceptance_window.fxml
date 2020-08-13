@@ -4,13 +4,13 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.belamila.ui.AcceptanceWindow">
    <children>
       <ListView fx:id="listView" prefHeight="378.0" prefWidth="600.0" />
       <ButtonBar prefHeight="40.0" prefWidth="200.0">
         <buttons>
-          <Button mnemonicParsing="false" text="Excel" />
-            <Button mnemonicParsing="false" text="WebApi" />
+          <Button fx:id="buttonExcel" mnemonicParsing="false" text="Excel" />
+            <Button fx:id="buttonWebApi" mnemonicParsing="false" text="WebApi" />
         </buttons>
          <VBox.margin>
             <Insets bottom="5.0" left="5.0" top="5.0" />

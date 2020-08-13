@@ -16,6 +16,7 @@ import lombok.ToString;
 @ToString
 public class Package {
 
+    private String id;
     private String service;
 
     private String receiver;

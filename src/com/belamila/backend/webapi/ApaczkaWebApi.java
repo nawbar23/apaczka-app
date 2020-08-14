@@ -41,12 +41,13 @@ public class ApaczkaWebApi {
 
         for (Package p : packages) {
             JSONObject send = sendOrder(p);
-            JSONObject waybill = downloadWaybill(send.getString("id"));
+            JSONObject waybill = downloadWaybill(
+                    send.getJSONObject("order").getInt("id"));
             safeWaybill(waybill.getString("waybill"), p, file);
         }
     }
 
-    private void safeWaybill(String pdfBase64, Package p, File input) throws Exception {
+    public void safeWaybill(String pdfBase64, Package p, File input) throws Exception {
         String fileName;
         if (p.getService().equals("INPOST")) {
             fileName = "InPost - ";
@@ -62,8 +63,8 @@ public class ApaczkaWebApi {
         fop.close();
     }
 
-    private JSONObject downloadWaybill(String o) throws Exception {
-        return request("waybill/" + o, "");
+    public JSONObject downloadWaybill(int orderId) throws Exception {
+        return request("waybill/" + orderId + "/", new JSONObject().toString());
     }
 
     public JSONObject valuateOrder(Package p) throws Exception {
@@ -104,7 +105,9 @@ public class ApaczkaWebApi {
         String responseString = response.body().string();
         response.body().close();
 
-        logger.info("Call: {}({}): {}", endpoint, data, responseString);
+        String responsePrint = responseString.substring(0, Math.min(responseString.length(), 2000));
+        logger.info("Call: {}({}): {}{}", endpoint, data, responsePrint,
+                responseString.length() != responsePrint.length() ? " <<< and many more characters... >>>" : "");
 
         JSONObject responseJson = new JSONObject(responseString);
         if (responseJson.getInt("status") != 200) {

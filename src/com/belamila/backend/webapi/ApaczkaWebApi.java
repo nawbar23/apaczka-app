@@ -24,10 +24,9 @@ public class ApaczkaWebApi {
 
     private static final Logger logger = LoggerFactory.getLogger(ApaczkaWebApi.class);
 
-    private final String API_URL = "https://www.apaczka.pl/api/v2/";
-
-    private final String APP_ID = "1254552_5f17ff51d9ec51.40863007";
-    private final String APP_SECRET = "85e5m4fk75t6mb3pcy68n7yjwt53v983";
+    private static final String API_URL = "https://www.apaczka.pl/api/v2/";
+    private static final String APP_ID = ApaczkaKeys.APP_ID;
+    private static final String APP_SECRET = ApaczkaKeys.APP_ID;
 
     private final OkHttpClient client = new OkHttpClient();
 
@@ -64,7 +63,7 @@ public class ApaczkaWebApi {
     }
 
     public JSONObject downloadWaybill(int orderId) throws Exception {
-        return request("waybill/" + orderId + "/", new JSONObject().toString());
+        return request("waybill/" + orderId + "/", "{}");
     }
 
     public JSONObject valuateOrder(Package p) throws Exception {

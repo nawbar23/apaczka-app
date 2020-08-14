@@ -57,8 +57,6 @@ public class AcceptanceWindow implements Initializable {
     }
 
     public static Result verify(List<Package> packages) throws Exception {
-        logger.info("Verify {}", packages);
-
         Platform.runLater(() -> {
             try {
                 URL url = new File("src/com/belamila/ui/fxml/acceptance_window.fxml").toURI().toURL();

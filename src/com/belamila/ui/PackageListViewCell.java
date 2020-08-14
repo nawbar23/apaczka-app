@@ -60,7 +60,8 @@ public class PackageListViewCell extends ListCell<Package> {
             logger.info("PackageListViewCell.updateItem: {}", p);
 
             if (mLLoader == null) {
-                URL url = new File("src/com/belamila/ui/fxml/list_cell.fxml").toURI().toURL();
+                URL url = new File("src/com/belamila/ui/fxml/list_cell.fxml")
+                        .toURI().toURL();
                 mLLoader = new FXMLLoader(url);
                 mLLoader.setController(this);
 
@@ -79,6 +80,9 @@ public class PackageListViewCell extends ListCell<Package> {
 
             if (p.getService().equals("DPD Classic")) {
                 inpostId.setVisible(false);
+            } else {
+                inpostId.textProperty().addListener(
+                        (observable, oldValue, newValue) -> p.setInpostId(newValue));
             }
 
             setText(null);

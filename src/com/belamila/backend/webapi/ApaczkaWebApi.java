@@ -6,10 +6,12 @@ import org.apache.commons.codec.binary.Hex;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.misc.BASE64Decoder;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -31,18 +33,49 @@ public class ApaczkaWebApi {
 
     public void issueOrdersAndDownloadCards(List<Package> packages, File file) throws Exception {
         for (Package p : packages) {
+            if (p.getService().equals("INPOST")) {
+                // TODO validate inpost ID
+            }
             valuateOrder(p);
         }
 
-        // TODO issue orders
+        for (Package p : packages) {
+            JSONObject send = sendOrder(p);
+            JSONObject waybill = downloadWaybill(send.getString("id"));
+            safeWaybill(waybill.getString("waybill"), p, file);
+        }
+    }
 
-        // TODO download waybill and safe in file directory with name "Package.receiver Package.service.pdf"
+    private void safeWaybill(String pdfBase64, Package p, File input) throws Exception {
+        String fileName;
+        if (p.getService().equals("INPOST")) {
+            fileName = "InPost - ";
+        } else {
+            fileName = "DPD - ";
+        }
+        fileName += p.getId() + " - " + p.getReceiver() + ".pdf";
+
+        File file = new File(input.getParent() + "\\" + fileName);
+        FileOutputStream fop = new FileOutputStream(file);
+        fop.write(new BASE64Decoder().decodeBuffer(pdfBase64));
+        fop.flush();
+        fop.close();
+    }
+
+    private JSONObject downloadWaybill(String o) throws Exception {
+        return request("waybill/" + o, "");
     }
 
     public JSONObject valuateOrder(Package p) throws Exception {
         JSONObject json = new JSONObject();
         json.put("order", Order.build(p));
         return request("order_valuation/", json.toString());
+    }
+
+    public JSONObject sendOrder(Package p) throws Exception {
+        JSONObject json = new JSONObject();
+        json.put("order", Order.build(p));
+        return request("order_send/", json.toString());
     }
 
     public JSONObject listOrders(int page, int limit) throws Exception {
@@ -56,9 +89,6 @@ public class ApaczkaWebApi {
         String expires = getExpires();
         String sing = stringToSign(endpoint, data, expires);
         String signature = getSignature(sing);
-
-        logger.info("String: {}", sing);
-        logger.info("Signature: {}", signature);
 
         RequestBody formBody = new FormBody.Builder()
                 .add("app_id", APP_ID)
@@ -92,9 +122,10 @@ public class ApaczkaWebApi {
     }
 
     private String getSignature(String data) throws Exception {
-        Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
-        SecretKeySpec secret_key = new SecretKeySpec(APP_SECRET.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-        sha256_HMAC.init(secret_key);
-        return Hex.encodeHexString(sha256_HMAC.doFinal(data.getBytes(StandardCharsets.UTF_8)));
+        String algorithm = "HmacSHA256";
+        Mac sha256 = Mac.getInstance(algorithm);
+        SecretKeySpec secret_key = new SecretKeySpec(APP_SECRET.getBytes(StandardCharsets.UTF_8), algorithm);
+        sha256.init(secret_key);
+        return Hex.encodeHexString(sha256.doFinal(data.getBytes(StandardCharsets.UTF_8)));
     }
 }

@@ -30,12 +30,15 @@ public class Main extends Application {
 
     private final ExecutorService executorService = Executors.newCachedThreadPool();
 
+    private Label summary;
+
     @Override
     public void start(Stage primaryStage) {
         Label label = new Label("Drag and drop orders Wix CSV file");
         Label dropped = new Label("");
+        summary = new Label("");
         VBox dragTarget = new VBox();
-        dragTarget.getChildren().addAll(label, dropped);
+        dragTarget.getChildren().addAll(label, dropped, summary);
         dragTarget.setOnDragOver(event -> {
             if (event.getGestureSource() != dragTarget
                     && event.getDragboard().hasFiles()) {
@@ -98,7 +101,8 @@ public class Main extends Application {
                 new ExcelBuilder().buildAndSafe(packages, file);
                 return "Generated " + packages.size() + " EXCEL orders! :)";
             case WEB_API:
-                return new ApaczkaWebApi().issueOrdersAndDownloadCards(packages, file);
+                new ApaczkaWebApi().issueOrdersAndDownloadCards(packages, file);
+                return "Issued " + packages.size() + " orders via WebApi :)";
             default:
                 throw new RuntimeException("Incorrect window result");
         }

@@ -52,6 +52,8 @@ public class AcceptanceWindow implements Initializable {
     private static Result result;
     private static List<Package> packagesResult;
 
+    private static Stage window;
+
     public AcceptanceWindow() {
         packageObservableList = FXCollections.observableArrayList();
     }
@@ -65,7 +67,7 @@ public class AcceptanceWindow implements Initializable {
                 AcceptanceWindow controller = fxmlLoader.getController();
                 controller.setPackages(packages);
                 Scene scene = new Scene(root);
-                Stage window = new Stage();
+                window = new Stage();
                 window.setScene(scene);
                 window.show();
 
@@ -84,6 +86,7 @@ public class AcceptanceWindow implements Initializable {
             throw new RuntimeException("Acceptance window closed without result!");
         }
 
+        Platform.runLater(() -> window.close());
         packages.clear();
         packages.addAll(packagesResult);
         return result;

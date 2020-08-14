@@ -32,9 +32,6 @@ public class ApaczkaWebApi {
 
     public String issueOrdersAndDownloadCards(List<Package> packages, File file) throws Exception {
         for (Package p : packages) {
-            if (p.getService().equals("INPOST")) {
-                // TODO validate inpost ID
-            }
             valuateOrder(p);
         }
 

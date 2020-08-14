@@ -95,3 +95,6 @@ modules.xml
 
 # Belamila misc files
 misc/
+
+# Apaczka keys
+src/com/belamila/backend/webapi/ApaczkaKeys.java

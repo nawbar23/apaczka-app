@@ -58,6 +58,7 @@ public class Order {
         sender.put("contact_person", "BELAMILA");
         sender.put("email", "sklep@belamila.pl");
         sender.put("phone", "+48889127157");
+        sender.put("foreign_address_id", "KRA01MP");
         address.put("sender", sender);
         template.put("address", address);
 

@@ -26,7 +26,7 @@ public class ApaczkaWebApi {
 
     private static final String API_URL = "https://www.apaczka.pl/api/v2/";
     private static final String APP_ID = ApaczkaKeys.APP_ID;
-    private static final String APP_SECRET = ApaczkaKeys.APP_ID;
+    private static final String APP_SECRET = ApaczkaKeys.APP_SECRET;
 
     private final OkHttpClient client = new OkHttpClient();
 

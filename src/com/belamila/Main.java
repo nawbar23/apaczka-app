@@ -98,8 +98,7 @@ public class Main extends Application {
                 new ExcelBuilder().buildAndSafe(packages, file);
                 return "Generated " + packages.size() + " EXCEL orders! :)";
             case WEB_API:
-                new ApaczkaWebApi().issueOrdersAndDownloadCards(packages, file);
-                return "Issued " + packages.size() + " orders via WebApi! :)";
+                return new ApaczkaWebApi().issueOrdersAndDownloadCards(packages, file);
             default:
                 throw new RuntimeException("Incorrect window result");
         }

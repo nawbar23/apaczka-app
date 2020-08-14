@@ -30,7 +30,7 @@ public class ApaczkaWebApi {
 
     private final OkHttpClient client = new OkHttpClient();
 
-    public void issueOrdersAndDownloadCards(List<Package> packages, File file) throws Exception {
+    public String issueOrdersAndDownloadCards(List<Package> packages, File file) throws Exception {
         for (Package p : packages) {
             if (p.getService().equals("INPOST")) {
                 // TODO validate inpost ID
@@ -38,12 +38,21 @@ public class ApaczkaWebApi {
             valuateOrder(p);
         }
 
+        StringBuilder summary = new StringBuilder();
         for (Package p : packages) {
             JSONObject send = sendOrder(p);
             JSONObject waybill = downloadWaybill(
                     send.getJSONObject("order").getInt("id"));
             safeWaybill(waybill.getString("waybill"), p, file);
+
+            summary.append(p.getId()).append(" ");
+            summary.append(p.getReceiver()).append(" ");
+            summary.append(p.getService()).append(" ");
+            summary.append(send.getJSONObject("order").getString("waybill_number"));
+            summary.append('\n');
         }
+
+        return summary.toString();
     }
 
     public void safeWaybill(String pdfBase64, Package p, File input) throws Exception {

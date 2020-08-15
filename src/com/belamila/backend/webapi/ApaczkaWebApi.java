@@ -1,6 +1,7 @@
 package com.belamila.backend.webapi;
 
 import com.belamila.model.Package;
+import com.belamila.ui.ProgressListener;
 import okhttp3.*;
 import org.apache.commons.codec.binary.Hex;
 import org.json.JSONObject;
@@ -30,35 +31,42 @@ public class ApaczkaWebApi {
 
     private final OkHttpClient client = new OkHttpClient();
 
-    public String issueOrdersAndDownloadCards(List<Package> packages, File file) throws Exception {
+    private final ProgressListener listener;
+
+    public ApaczkaWebApi(ProgressListener listener) {
+        this.listener = listener;
+    }
+
+    public void issueOrdersAndDownloadCards(List<Package> packages, File file) throws Exception {
         for (Package p : packages) {
+            // TODO validate InPost id
             valuateOrder(p);
         }
 
-        StringBuilder summary = new StringBuilder();
+        int i = 1;
         for (Package p : packages) {
             JSONObject send = sendOrder(p);
             JSONObject waybill = downloadWaybill(
                     send.getJSONObject("order").getInt("id"));
             safeWaybill(waybill.getString("waybill"), p, file);
 
-            summary.append(p.getId()).append(" ");
-            summary.append(p.getReceiver()).append(" ");
-            summary.append(p.getService()).append(" ");
-            summary.append(send.getJSONObject("order").getString("waybill_number"));
-            summary.append('\n');
-        }
+            Thread.sleep(1000);
 
-        return summary.toString();
+            StringBuilder progress = new StringBuilder();
+            progress.append(i++).append('/').append(packages.size()).append(" - ");
+            progress.append(p.getId()).append(" ");
+            progress.append(p.getReceiver()).append(" ");
+            progress.append(p.getServiceName());
+            progress.append(send.getJSONObject("order").getString("waybill_number"));
+            progress.append('\n');
+            listener.onProgressUpdated(progress.toString());
+        }
+        listener.onProgressUpdated("Issued " + packages.size() + " packages with WebApi :)");
     }
 
     public void safeWaybill(String pdfBase64, Package p, File input) throws Exception {
         String fileName;
-        if (p.getService().equals("INPOST")) {
-            fileName = "InPost - ";
-        } else {
-            fileName = "DPD - ";
-        }
+        fileName = p.getServiceName();
         fileName += p.getId() + " - " + p.getReceiver() + ".pdf";
 
         File file = new File(input.getParent() + "\\" + fileName);

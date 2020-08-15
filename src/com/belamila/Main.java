@@ -5,12 +5,11 @@ import com.belamila.backend.parser.Parser;
 import com.belamila.backend.webapi.ApaczkaWebApi;
 import com.belamila.model.Package;
 import com.belamila.ui.AcceptanceWindow;
+import com.belamila.ui.ProgressListener;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.StackPane;
@@ -24,19 +23,21 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class Main extends Application {
+public class Main extends Application implements ProgressListener {
 
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     private final ExecutorService executorService = Executors.newCachedThreadPool();
 
-    private Label summary;
+
+    private TextArea summary;
 
     @Override
     public void start(Stage primaryStage) {
         Label label = new Label("Drag and drop orders Wix CSV file");
         Label dropped = new Label("");
-        summary = new Label("");
+        summary = new TextArea("");
+        summary.setEditable(false);
         VBox dragTarget = new VBox();
         dragTarget.getChildren().addAll(label, dropped, summary);
         dragTarget.setOnDragOver(event -> {
@@ -54,6 +55,7 @@ public class Main extends Application {
                 logger.info("Dropped event {}", db.getString());
                 File file = db.getFiles().get(0);
                 dropped.setText(file.toString());
+                summary.setText("");
                 executorService.execute(() -> onDragHandle(file));
                 success = true;
             }
@@ -73,39 +75,40 @@ public class Main extends Application {
     }
 
     private void onDragHandle(File file) {
-        Alert.AlertType alertType;
-        String message;
         try {
-            message = executeLogic(file);
-            alertType = Alert.AlertType.INFORMATION;
+            executeLogic(file);
         } catch (Exception e) {
             logger.warn("", e);
-            message = e.toString();
-            alertType = Alert.AlertType.ERROR;
+            Platform.runLater(() -> {
+                Alert alert = new Alert(Alert.AlertType.ERROR, e.toString(), ButtonType.CLOSE);
+                alert.showAndWait();
+                Platform.exit();
+            });
         }
-        Alert.AlertType finalAlertType = alertType;
-        String finalMessage = message;
-        Platform.runLater(() -> {
-            Alert alert = new Alert(finalAlertType, finalMessage, ButtonType.CLOSE);
-            alert.showAndWait();
-            Platform.exit();
-        });
     }
 
-    private String executeLogic(File file) throws Exception {
+    private void executeLogic(File file) throws Exception {
         List<Package> packages = new Parser().parse(file);
         AcceptanceWindow.Result result = AcceptanceWindow.verify(packages);
         logger.info("Acceptance result: {}, packages: {}", result, packages);
+        onProgressUpdated("Starting " + result.toString() + "...\n");
         switch (result) {
             case EXCEL:
-                new ExcelBuilder().buildAndSafe(packages, file);
-                return "Generated " + packages.size() + " EXCEL orders! :)";
+                new ExcelBuilder(this).buildAndSafe(packages, file);
+                return;
             case WEB_API:
-                new ApaczkaWebApi().issueOrdersAndDownloadCards(packages, file);
-                return "Issued " + packages.size() + " orders via WebApi :)";
+                new ApaczkaWebApi(this).issueOrdersAndDownloadCards(packages, file);
+                return;
             default:
                 throw new RuntimeException("Incorrect window result");
         }
+    }
+
+    @Override
+    public void onProgressUpdated(String message) {
+        Platform.runLater(() -> {
+            summary.setText(summary.getText() + message);
+        });
     }
 
     @Override

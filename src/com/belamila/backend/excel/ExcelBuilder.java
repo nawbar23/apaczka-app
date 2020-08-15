@@ -1,6 +1,7 @@
 package com.belamila.backend.excel;
 
 import com.belamila.model.Package;
+import com.belamila.ui.ProgressListener;
 import org.apache.poi.ss.usermodel.CellCopyPolicy;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
@@ -24,6 +25,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ExcelBuilder {
 
     private static final Logger logger = LoggerFactory.getLogger(ExcelBuilder.class);
+
+    private final ProgressListener listener;
+
+    public ExcelBuilder(ProgressListener listener) {
+        this.listener = listener;
+    }
 
     private void setCell(XSSFCell cell, CellStyle style, String value) {
         cell.setCellStyle(style);
@@ -57,7 +64,7 @@ public class ExcelBuilder {
         });
     }
 
-    public int buildAndSafe(List<Package> packages, File input) throws IOException {
+    public void buildAndSafe(List<Package> packages, File input) throws IOException {
         String name = input.getName();
         File output = new File(input.getParent()
                 + "\\" + name.substring(0, name.lastIndexOf('.')) + "-apaczka.xlsx");
@@ -73,6 +80,6 @@ public class ExcelBuilder {
         workbook.write(out);
         out.close();
 
-        return packages.size();
+        listener.onProgressUpdated("Generated Excel file with " + packages.size() + " packages :)");
     }
 }

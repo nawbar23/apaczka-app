@@ -38,6 +38,7 @@ public class Main extends Application implements ProgressListener {
         Label dropped = new Label("");
         summary = new TextArea("");
         summary.setEditable(false);
+        summary.setPrefRowCount(20);
         VBox dragTarget = new VBox();
         dragTarget.getChildren().addAll(label, dropped, summary);
         dragTarget.setOnDragOver(event -> {
@@ -66,7 +67,7 @@ public class Main extends Application implements ProgressListener {
         StackPane root = new StackPane();
         root.getChildren().add(dragTarget);
 
-        Scene scene = new Scene(root, 500, 250);
+        Scene scene = new Scene(root, 600, 350);
 
         primaryStage.setTitle("Apaczka for Belamila :)");
         primaryStage.setScene(scene);

@@ -56,7 +56,7 @@ public class Order {
         sender.put("postal_code", "31-356");
         sender.put("city", "Kraków");
         sender.put("contact_person", "BELAMILA");
-        sender.put("email", "sklep@belamila.pl");
+        sender.put("email", "sklep@com.belamila.pl");
         sender.put("phone", "+48889127157");
         sender.put("foreign_address_id", "KRA01MP");
         address.put("sender", sender);

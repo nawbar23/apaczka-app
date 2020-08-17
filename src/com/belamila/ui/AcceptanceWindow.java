@@ -49,6 +49,7 @@ public class AcceptanceWindow implements Initializable {
     private List<Package> packages;
 
     private static final Boolean condition = true;
+    private static Exception exception;
     private static Result result;
     private static List<Package> packagesResult;
 
@@ -60,8 +61,11 @@ public class AcceptanceWindow implements Initializable {
 
     public static Result verify(List<Package> packages) throws Exception {
         Platform.runLater(() -> {
+            exception = null;
+            result = null;
+            packagesResult = null;
             try {
-                URL url = new File("src/com/belamila/ui/fxml/acceptance_window.fxml").toURI().toURL();
+                URL url = new File("src/fxml/acceptance_window.fxml").toURI().toURL();
                 FXMLLoader fxmlLoader = new FXMLLoader(url);
                 Parent root = fxmlLoader.load();
                 AcceptanceWindow controller = fxmlLoader.getController();
@@ -69,10 +73,15 @@ public class AcceptanceWindow implements Initializable {
                 Scene scene = new Scene(root);
                 window = new Stage();
                 window.setScene(scene);
+                window.setOnCloseRequest(event -> close());
                 window.show();
 
             } catch (IOException e) {
-                logger.info("", e);
+                logger.warn("", e);
+                exception = e;
+                synchronized (condition) {
+                    condition.notify();
+                }
             }
         });
 
@@ -80,16 +89,27 @@ public class AcceptanceWindow implements Initializable {
             synchronized (condition) {
                 condition.wait();
             }
-        } catch (InterruptedException ignored) {};
+        } catch (InterruptedException ignored) {}
+
+        Platform.runLater(() -> window.close());
+
+        if (exception != null) {
+            throw exception;
+        }
 
         if (result == null) {
             throw new RuntimeException("Acceptance window closed without result!");
         }
 
-        Platform.runLater(() -> window.close());
         packages.clear();
         packages.addAll(packagesResult);
         return result;
+    }
+
+    public static void close() {
+        synchronized (condition) {
+            condition.notify();
+        }
     }
 
     @Override
@@ -101,7 +121,7 @@ public class AcceptanceWindow implements Initializable {
             packageObservableList.addAll(packages);
             listView.setItems(packageObservableList);
             listView.setCellFactory(studentListView ->
-                    new PackageListViewCell(packageObservableList));
+                    new com.belamila.ui.PackageListViewCell(packageObservableList));
         });
     }
 

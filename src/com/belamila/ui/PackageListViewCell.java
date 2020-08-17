@@ -60,8 +60,7 @@ public class PackageListViewCell extends ListCell<Package> {
             logger.info("PackageListViewCell.updateItem: {}", p);
 
             if (mLLoader == null) {
-                URL url = new File("src/com/belamila/ui/fxml/list_cell.fxml")
-                        .toURI().toURL();
+                URL url = new File("src/fxml/list_cell.fxml").toURI().toURL();
                 mLLoader = new FXMLLoader(url);
                 mLLoader.setController(this);
 

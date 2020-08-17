@@ -72,6 +72,10 @@ public class Main extends Application implements ProgressListener {
         primaryStage.setTitle("Apaczka for Belamila :)");
         primaryStage.setScene(scene);
         primaryStage.resizableProperty().setValue(Boolean.FALSE);
+        primaryStage.setOnCloseRequest(event -> {
+            AcceptanceWindow.close();
+            Platform.exit();
+        });
         primaryStage.show();
     }
 
@@ -83,7 +87,6 @@ public class Main extends Application implements ProgressListener {
             Platform.runLater(() -> {
                 Alert alert = new Alert(Alert.AlertType.ERROR, e.toString(), ButtonType.CLOSE);
                 alert.showAndWait();
-                Platform.exit();
             });
         }
     }

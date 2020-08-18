@@ -31,8 +31,8 @@ public class Order {
         }
         json.getJSONObject("address").put("receiver", receiver);
 
-        if (p.getAmount() > 0.0f) {
-            json.getJSONObject("cod").put("amount", p.getAmount() * 100.0f);
+        if (p.getAmount() > 0.0) {
+            json.getJSONObject("cod").put("amount", p.getAmount() * 100.0);
         }
 
         return json;

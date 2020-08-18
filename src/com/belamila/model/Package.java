@@ -27,7 +27,7 @@ public class Package {
     private String phone;
     private String inPostId;
 
-    private float amount;
+    private Double amount;
 
     public String getServiceName() {
         if (getService().equals("INPOST")) {

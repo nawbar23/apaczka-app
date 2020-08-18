@@ -69,11 +69,11 @@ public class CsvReader {
         }
     }
 
-    private float parseAmount(String deliveryMethod, String value) {
-        float result = -1.0f;
+    private Double parseAmount(String deliveryMethod, String value) {
+        double result = -1.0;
         if (deliveryMethod.equals("DPD Pobranie ")) {
             try {
-                result = Float.parseFloat(value);
+                result = Double.parseDouble(value);
             } catch (NumberFormatException ignored) { };
         }
         return result;

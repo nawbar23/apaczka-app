@@ -88,6 +88,7 @@ public class Main extends Application implements ProgressListener {
         } catch (Exception e) {
             logger.warn("", e);
             Platform.runLater(() -> {
+                onProgressUpdated("Finished after error :(");
                 Alert alert = new Alert(Alert.AlertType.ERROR, e.toString(), ButtonType.CLOSE);
                 alert.showAndWait();
             });

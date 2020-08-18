@@ -11,10 +11,8 @@ import org.json.JSONObject;
  */
 public class Order {
 
-    private static final JSONObject ORDER_TEMPLATE = getOrderTemplate();
-
     public static JSONObject build(Package p) {
-        JSONObject json = new JSONObject(ORDER_TEMPLATE, JSONObject.getNames(ORDER_TEMPLATE));
+        JSONObject json = getOrderTemplate();
         json.put("service_id", getServiceId(p.getService()));
 
         JSONObject receiver = new JSONObject();
@@ -33,9 +31,8 @@ public class Order {
         }
         json.getJSONObject("address").put("receiver", receiver);
 
-
         if (p.getAmount() > 0.0f) {
-            json.getJSONObject("cod").put("amount", p.getAmount());
+            json.getJSONObject("cod").put("amount", p.getAmount() * 100.0f);
         }
 
         return json;
@@ -89,7 +86,7 @@ public class Order {
         template.put("shipment", shipment);
 
         JSONObject cod = new JSONObject();
-        cod.put("bankaccount", "");
+        cod.put("bankaccount", "31105016181000002324507819");
         template.put("cod", cod);
 
         template.put("comment", "Say hello to your BELAMILA!");

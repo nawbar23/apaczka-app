@@ -48,6 +48,7 @@ public class CsvReader {
                         .email(val.get(19))
                         .zip(val.get(16).replace("\"", ""))
                         .phone(val.get(17).replace("\"", ""))
+                        .amount(parseAmount(val.get(20), val.get(32)))
                         .build();
                 packages.add(pack);
                 logger.debug("{}", pack);
@@ -57,12 +58,24 @@ public class CsvReader {
     }
 
     private String parseService(String deliveryMethod) throws RuntimeException {
-        if (deliveryMethod.equals("Kurier DPD ") || deliveryMethod.equals("DPD In Advance ")) {
+        if (deliveryMethod.equals("Kurier DPD ")
+                || deliveryMethod.equals("DPD In Advance ")
+                || deliveryMethod.equals("DPD Pobranie ")) {
             return "DPD Classic";
-        } else if (deliveryMethod.equals("Paczkomaty Inpost Proszę o maila z danymi paczkomatu")) {
+        } else if (deliveryMethod.equals("Paczkomaty InPost Proszę o maila z danymi paczkomatu")) {
             return "INPOST";
         } else {
             return null;
         }
+    }
+
+    private float parseAmount(String deliveryMethod, String value) {
+        float result = -1.0f;
+        if (deliveryMethod.equals("DPD Pobranie ")) {
+            try {
+                result = Float.parseFloat(value);
+            } catch (NumberFormatException ignored) { };
+        }
+        return result;
     }
 }

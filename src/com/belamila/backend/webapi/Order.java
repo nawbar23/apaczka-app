@@ -26,13 +26,18 @@ public class Order {
         receiver.put("phone", p.getPhone());
 
         if (p.getService().equals("INPOST")) {
-            receiver.put("foreign_address_id", p.getInpostId());
+            receiver.put("foreign_address_id", p.getInPostId());
         } else {
             receiver.put("line1", p.getAddress());
             receiver.put("postal_code", p.getZip());
         }
-
         json.getJSONObject("address").put("receiver", receiver);
+
+
+        if (p.getAmount() > 0.0f) {
+            json.getJSONObject("cod").put("amount", p.getAmount());
+        }
+
         return json;
     }
 
@@ -51,11 +56,11 @@ public class Order {
         JSONObject address = new JSONObject();
         JSONObject sender = new JSONObject();
         sender.put("country_code", "PL");
-        sender.put("name", "F. H. U. OKNA Jerzy Kosim");
+        sender.put("name", "BELAMILA");
         sender.put("line1", "Wizjonerów 2/23");
         sender.put("postal_code", "31-356");
         sender.put("city", "Kraków");
-        sender.put("contact_person", "BELAMILA");
+        sender.put("contact_person", "Mila");
         sender.put("email", "sklep@belamila.pl");
         sender.put("phone", "+48889127157");
         sender.put("foreign_address_id", "KRA01MP");
@@ -83,7 +88,11 @@ public class Order {
         shipment.put(shipElement);
         template.put("shipment", shipment);
 
-        template.put("comment", "Say hello to your new BELAMILA!");
+        JSONObject cod = new JSONObject();
+        cod.put("bankaccount", "");
+        template.put("cod", cod);
+
+        template.put("comment", "Say hello to your BELAMILA!");
         template.put("content", "BELAMILA.PL");
 
         return template;

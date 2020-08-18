@@ -1,6 +1,7 @@
 package com.belamila.ui;
 
 import com.belamila.model.Package;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.LinkedList;
 
 /**
  * Created by: Bartosz Nawrot
@@ -44,8 +46,11 @@ public class PackageListViewCell extends ListCell<Package> {
 
     private FXMLLoader mLLoader;
 
+    private LinkedList<ChangeListener<String>> listeners;
+
     public PackageListViewCell(ObservableList<Package> packageObservableList) {
         this.packageObservableList = packageObservableList;
+        this.listeners = new LinkedList<>();
     }
 
     @SneakyThrows
@@ -77,11 +82,19 @@ public class PackageListViewCell extends ListCell<Package> {
             receiver.setText(p.getReceiver());
             service.setText(p.getService());
 
+            listeners.forEach(l -> inpostId.textProperty().removeListener(l));
+            inpostId.setText(null);
             if (p.getService().equals("DPD Classic")) {
                 inpostId.setVisible(false);
             } else {
-                inpostId.textProperty().addListener(
-                        (observable, oldValue, newValue) -> p.setInpostId(newValue));
+                inpostId.setVisible(true);
+                if (p.getInPostId() != null) {
+                    inpostId.setText(p.getInPostId());
+                }
+                ChangeListener<String> l =
+                        (observable, oldValue, newValue) -> p.setInPostId(newValue);
+                listeners.add(l);
+                inpostId.textProperty().addListener(l);
             }
 
             setText(null);

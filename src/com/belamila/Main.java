@@ -9,7 +9,10 @@ import com.belamila.ui.ProgressListener;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.StackPane;
@@ -93,6 +96,8 @@ public class Main extends Application implements ProgressListener {
 
     private void executeLogic(File file) throws Exception {
         List<Package> packages = new Parser().parse(file);
+        packages.sort((p1, p2) -> Integer.valueOf(p2.getId()).compareTo(Integer.valueOf(p1.getId())));
+
         AcceptanceWindow.Result result = AcceptanceWindow.verify(packages);
         logger.info("Acceptance result: {}, packages: {}", result, packages);
         onProgressUpdated("Starting " + result.toString() + "...\n");

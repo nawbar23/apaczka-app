@@ -25,7 +25,9 @@ public class Package {
     private String city;
     private String email;
     private String phone;
-    private String inpostId;
+    private String inPostId;
+
+    private float amount;
 
     public String getServiceName() {
         if (getService().equals("INPOST")) {

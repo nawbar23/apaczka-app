@@ -66,7 +66,7 @@ public class Order {
 
         JSONObject notification = new JSONObject();
         notification.put("new", getNotificationStructure(0, 0, 0));
-        notification.put("sent", getNotificationStructure(1, 1, 1));
+        notification.put("sent", getNotificationStructure(1, 1, 0));
         notification.put("exception", getNotificationStructure(0, 0, 1));
         notification.put("delivered", getNotificationStructure(1, 1, 0));
         template.put("notification", notification);

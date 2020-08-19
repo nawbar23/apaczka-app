@@ -124,13 +124,15 @@ public class ApaczkaWebApi {
 
         JSONObject responseJson = new JSONObject(responseString);
         if (responseJson.getInt("status") != 200) {
+            logger.warn("app_id:{}, signature:{}, expires:{}, request:{}, response:{}",
+                    APP_ID, signature, expires, data, responseString);
             throw new RuntimeException(responseJson.getString("message"));
         }
         return responseJson.getJSONObject("response");
     }
 
     private String getExpires() {
-        return String.valueOf((System.currentTimeMillis() + 1800000)/1000);
+        return String.valueOf((System.currentTimeMillis() + 600000)/1000);
     }
 
     private String stringToSign(String endpoint, String data, String expires) {

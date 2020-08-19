@@ -37,6 +37,7 @@ public class Main extends Application implements ProgressListener {
 
     @Override
     public void start(Stage primaryStage) {
+        logger.info("Apaczka app started");
         Label label = new Label("Drag and drop orders Wix CSV file");
         Label dropped = new Label("");
         summary = new TextArea("");

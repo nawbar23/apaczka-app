@@ -53,8 +53,6 @@ public class ApaczkaWebApi {
                     send.getJSONObject("order").getInt("id"));
             safeWaybill(waybill.getString("waybill"), p, file);
 
-            Thread.sleep(1000);
-
             StringBuilder progress = new StringBuilder();
             progress.append(i++).append('/').append(packages.size()).append(" - ");
             progress.append(p.getId()).append(" ");

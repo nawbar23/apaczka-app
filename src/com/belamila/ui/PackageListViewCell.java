@@ -46,7 +46,7 @@ public class PackageListViewCell extends ListCell<Package> {
 
     private FXMLLoader mLLoader;
 
-    private LinkedList<ChangeListener<String>> listeners;
+    private final LinkedList<ChangeListener<String>> listeners;
 
     public PackageListViewCell(ObservableList<Package> packageObservableList) {
         this.packageObservableList = packageObservableList;
@@ -72,7 +72,7 @@ public class PackageListViewCell extends ListCell<Package> {
                 try {
                     mLLoader.load();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.warn("", e);
                 }
             }
 

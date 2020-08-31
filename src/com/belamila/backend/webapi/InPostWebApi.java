@@ -27,7 +27,7 @@ public class InPostWebApi {
                 .addHeader("Authorization", InPostKeys.APP_TOKEN)
                 .build();
 
-        logger.info("Validating InPostId:{}", request);
+        logger.info("Validating InPostId: {}", request);
 
         Response response = client.newCall(request).execute();
         JSONObject responseJson = new JSONObject(response.body().string());

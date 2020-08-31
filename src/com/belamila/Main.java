@@ -103,6 +103,7 @@ public class Main extends Application implements ProgressListener {
         AcceptanceWindow.Result result = AcceptanceWindow.verify(packages);
         logger.info("Acceptance result: {}, packages: {}", result, packages);
         onProgressUpdated("Starting " + result.toString() + "...\n");
+
         switch (result) {
             case EXCEL:
                 new ExcelBuilder(this).buildAndSafe(packages, file);

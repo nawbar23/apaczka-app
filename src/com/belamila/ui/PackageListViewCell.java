@@ -98,12 +98,30 @@ public class PackageListViewCell extends ListCell<Package> {
                 inpostId.setVisible(false);
             } else {
                 inpostId.setVisible(true);
-                inpostStatus.setImage(unknownImg);
+
                 if (p.getInPostId() != null) {
                     inpostId.setText(p.getInPostId());
                 }
+                switch (Package.InpostStatus.valueOf(p.getInpostStatus().getValue())) {
+                    case UNKNOWN:
+                        inpostStatus.setImage(unknownImg);
+                        break;
+                    case RUNNING:
+                        inpostStatus.setImage(runningImg);
+                        break;
+                    case DONE_VALID:
+                        inpostStatus.setImage(doneValidImg);
+                        break;
+                    case DONE_INVALID:
+                        inpostStatus.setImage(doneInvalidImg);
+                        break;
+                }
+
                 ChangeListener<String> l =
-                        (observable, oldValue, newValue) -> p.setInPostId(newValue);
+                        (observable, oldValue, newValue) -> {
+                            p.setInPostId(newValue);
+                            p.getInpostStatus().setValue(Package.InpostStatus.UNKNOWN.name());
+                        };
                 listeners.add(l);
                 inpostId.textProperty().addListener(l);
             }

@@ -1,5 +1,6 @@
 package com.belamila.model;
 
+import javafx.beans.property.StringProperty;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,6 +17,10 @@ import lombok.ToString;
 @ToString
 public class Package {
 
+    public enum InpostStatus {
+        UNKNOWN, RUNNING, DONE_VALID, DONE_INVALID
+    }
+
     private String id;
     private String service;
 
@@ -26,6 +31,7 @@ public class Package {
     private String email;
     private String phone;
     private String inPostId;
+    private StringProperty inpostStatus;
 
     private Double amount;
 

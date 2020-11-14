@@ -2,6 +2,8 @@ package com.belamila.ui;
 
 import com.belamila.model.Package;
 import javafx.application.Platform;
+import javafx.beans.Observable;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -19,9 +21,12 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.ResourceBundle;
+
+import static com.belamila.model.Package.InpostStatus.*;
 
 /**
  * Created by: Bartosz Nawrot
@@ -56,7 +61,8 @@ public class AcceptanceWindow implements Initializable {
     private static Stage window;
 
     public AcceptanceWindow() {
-        packageObservableList = FXCollections.observableArrayList();
+        packageObservableList = FXCollections.observableArrayList(
+                pack -> new Observable[] { pack.getInpostStatus() });
     }
 
     public static Result verify(List<Package> packages) throws Exception {
@@ -118,6 +124,8 @@ public class AcceptanceWindow implements Initializable {
         buttonExcel.setOnAction(event -> onFinished(Result.EXCEL));
         Platform.runLater(() -> {
             logger.info("Initialize: {}", packages);
+            packages.forEach(p -> p.setInpostStatus(
+                    new SimpleStringProperty(Package.InpostStatus.UNKNOWN.toString())));
             packageObservableList.addAll(packages);
             listView.setItems(packageObservableList);
             listView.setCellFactory(studentListView ->
@@ -126,10 +134,15 @@ public class AcceptanceWindow implements Initializable {
     }
 
     private void onFinished(Result excel) {
-        result = excel;
-        packagesResult = new ArrayList<>(packageObservableList);
-        synchronized (condition) {
-            condition.notify();
-        }
+        List<Package.InpostStatus> l1 = Arrays.asList(RUNNING, DONE_VALID, DONE_INVALID);
+        Random r = new Random();
+        packageObservableList.forEach(p -> {
+            p.getInpostStatus().setValue(l1.get(r.nextInt(l1.size())).toString());
+        });
+//        result = excel;
+//        packagesResult = new ArrayList<>(packageObservableList);
+//        synchronized (condition) {
+//            condition.notify();
+//        }
     }
 }

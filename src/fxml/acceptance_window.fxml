@@ -4,9 +4,9 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.belamila.ui.AcceptanceWindow">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="572.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.belamila.ui.AcceptanceWindow">
    <children>
-      <ListView fx:id="listView" prefHeight="378.0" prefWidth="600.0" />
+      <ListView fx:id="listView" prefHeight="571.0" prefWidth="700.0" />
       <ButtonBar prefHeight="40.0" prefWidth="200.0">
         <buttons>
           <Button fx:id="buttonExcel" mnemonicParsing="false" text="Excel" />

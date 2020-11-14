@@ -62,7 +62,8 @@ public class CsvReader {
                 || deliveryMethod.equals("DPD In Advance ")
                 || deliveryMethod.equals("DPD Pobranie ")) {
             return "DPD Classic";
-        } else if (deliveryMethod.equals("Paczkomaty InPost Proszę o maila z danymi paczkomatu")) {
+        } else if (deliveryMethod.equals("Paczkomaty InPost Proszę o maila z danymi paczkomatu")
+                || deliveryMethod.equals("Inpost Please, send an e-mail with parcel locker's details")) {
             return "INPOST";
         } else {
             return null;

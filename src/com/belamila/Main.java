@@ -32,7 +32,6 @@ public class Main extends Application implements ProgressListener {
 
     private final ExecutorService executorService = Executors.newCachedThreadPool();
 
-
     private TextArea summary;
 
     @Override
@@ -42,7 +41,7 @@ public class Main extends Application implements ProgressListener {
         Label dropped = new Label("");
         summary = new TextArea("");
         summary.setEditable(false);
-        summary.setPrefRowCount(20);
+        summary.setPrefRowCount(25);
         VBox dragTarget = new VBox();
         dragTarget.getChildren().addAll(label, dropped, summary);
         dragTarget.setOnDragOver(event -> {
@@ -71,7 +70,7 @@ public class Main extends Application implements ProgressListener {
         StackPane root = new StackPane();
         root.getChildren().add(dragTarget);
 
-        Scene scene = new Scene(root, 600, 350);
+        Scene scene = new Scene(root, 700, 550);
 
         primaryStage.setTitle("Apaczka for Belamila :)");
         primaryStage.setScene(scene);

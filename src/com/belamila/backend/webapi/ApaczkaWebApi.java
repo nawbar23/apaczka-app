@@ -38,31 +38,42 @@ public class ApaczkaWebApi {
         this.listener = listener;
     }
 
-    public void issueOrdersAndDownloadCards(List<Package> packages, File file) throws Exception {
-        for (Package p : packages) {
-            if (p.getService().equals("INPOST")) {
-                inPostWebApi.verifyInPostId(p.getInPostId());
-            }
-            valuateOrder(p);
-        }
+    public void issueOrdersAndDownloadCards(List<Package> packages, File file) {
+//        for (Package p : packages) {
+//            if (p.getService().equals("INPOST")) {
+//                inPostWebApi.verifyInPostId(p.getInPostId());
+//            }
+//            valuateOrder(p);
+//        }
 
         int i = 1;
+        int successes = 0;
         for (Package p : packages) {
-            JSONObject send = sendOrder(p);
-            JSONObject waybill = downloadWaybill(
-                    send.getJSONObject("order").getInt("id"));
-            safeWaybill(waybill.getString("waybill"), p, file);
-
             StringBuilder progress = new StringBuilder();
             progress.append(i++).append('/').append(packages.size()).append(" - ");
             progress.append(p.getId()).append(" ");
             progress.append(p.getReceiver()).append(" ");
             progress.append(p.getServiceName());
-            progress.append(send.getJSONObject("order").getString("waybill_number"));
+
+            try {
+                JSONObject send = sendOrder(p);
+                JSONObject waybill = downloadWaybill(
+                        send.getJSONObject("order").getInt("id"));
+                safeWaybill(waybill.getString("waybill"), p, file);
+                successes++;
+                progress.append(send.getJSONObject("order").getString("waybill_number"));
+
+            } catch (Exception e) {
+                logger.error("", e);
+                progress.append("error: ");
+                progress.append(e.getMessage());
+            }
+
             progress.append('\n');
             listener.onProgressUpdated(progress.toString());
         }
-        listener.onProgressUpdated("Issued " + packages.size() + " packages with WebApi :)");
+        listener.onProgressUpdated("Issued " + successes + "/"
+                + packages.size() + " packages with WebApi :)");
     }
 
     public void safeWaybill(String pdfBase64, Package p, File input) throws Exception {

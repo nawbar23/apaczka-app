@@ -9,6 +9,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
@@ -28,6 +30,11 @@ public class PackageListViewCell extends ListCell<Package> {
 
     private static final Logger logger = LoggerFactory.getLogger(PackageListViewCell.class);
 
+    private static final Image unknownImg = new Image("file:src/img/unknown.png");
+    private static final Image runningImg = new Image("file:src/img/running.png");
+    private static final Image doneValidImg = new Image("file:src/img/accepted.png");
+    private static final Image doneInvalidImg = new Image("file:src/img/invalid.png");
+
     private ObservableList<Package> packageObservableList;
 
     @FXML
@@ -40,6 +47,8 @@ public class PackageListViewCell extends ListCell<Package> {
     private Label service;
     @FXML
     private TextField inpostId;
+    @FXML
+    private ImageView inpostStatus;
 
     @FXML
     private GridPane gridPane;
@@ -84,10 +93,12 @@ public class PackageListViewCell extends ListCell<Package> {
 
             listeners.forEach(l -> inpostId.textProperty().removeListener(l));
             inpostId.setText(null);
+            inpostStatus.setImage(null);
             if (p.getService().equals("DPD Classic")) {
                 inpostId.setVisible(false);
             } else {
                 inpostId.setVisible(true);
+                inpostStatus.setImage(unknownImg);
                 if (p.getInPostId() != null) {
                     inpostId.setText(p.getInPostId());
                 }

@@ -31,7 +31,6 @@ public class PackageListViewCell extends ListCell<Package> {
     private static final Logger logger = LoggerFactory.getLogger(PackageListViewCell.class);
 
     private static final Image unknownImg = new Image("file:src/img/unknown.png");
-    private static final Image runningImg = new Image("file:src/img/running.png");
     private static final Image doneValidImg = new Image("file:src/img/accepted.png");
     private static final Image doneInvalidImg = new Image("file:src/img/invalid.png");
 
@@ -105,9 +104,6 @@ public class PackageListViewCell extends ListCell<Package> {
                 switch (Package.InpostStatus.valueOf(p.getInpostStatus().getValue())) {
                     case UNKNOWN:
                         inpostStatus.setImage(unknownImg);
-                        break;
-                    case RUNNING:
-                        inpostStatus.setImage(runningImg);
                         break;
                     case DONE_VALID:
                         inpostStatus.setImage(doneValidImg);

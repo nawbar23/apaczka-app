@@ -1,5 +1,6 @@
 package com.belamila.ui;
 
+import com.belamila.backend.webapi.InPostWebApi;
 import com.belamila.model.Package;
 import javafx.application.Platform;
 import javafx.beans.Observable;
@@ -11,7 +12,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ListView;
 import javafx.stage.Stage;
 import lombok.Setter;
@@ -21,10 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-import java.util.ResourceBundle;
+import java.util.*;
 
 import static com.belamila.model.Package.InpostStatus.*;
 
@@ -125,7 +125,7 @@ public class AcceptanceWindow implements Initializable {
         Platform.runLater(() -> {
             logger.info("Initialize: {}", packages);
             packages.forEach(p -> p.setInpostStatus(
-                    new SimpleStringProperty(Package.InpostStatus.UNKNOWN.toString())));
+                    new SimpleStringProperty(Package.InpostStatus.UNKNOWN.name())));
             packageObservableList.addAll(packages);
             listView.setItems(packageObservableList);
             listView.setCellFactory(studentListView ->
@@ -133,16 +133,39 @@ public class AcceptanceWindow implements Initializable {
         });
     }
 
-    private void onFinished(Result excel) {
-        List<Package.InpostStatus> l1 = Arrays.asList(RUNNING, DONE_VALID, DONE_INVALID);
-        Random r = new Random();
-        packageObservableList.forEach(p -> {
-            p.getInpostStatus().setValue(l1.get(r.nextInt(l1.size())).toString());
-        });
-//        result = excel;
-//        packagesResult = new ArrayList<>(packageObservableList);
-//        synchronized (condition) {
-//            condition.notify();
-//        }
+    private void onFinished(Result res) {
+        if (!validateInpost()) {
+            Alert alert = new Alert(Alert.AlertType.WARNING,
+                    "Wrong InPost ID", ButtonType.CLOSE);
+            alert.showAndWait();
+            return;
+        }
+        result = res;
+        packagesResult = new ArrayList<>(packageObservableList);
+        synchronized (condition) {
+            condition.notify();
+        }
+    }
+
+    private static final InPostWebApi inPostWebApi = new InPostWebApi();
+
+    private boolean validateInpost() {
+        long failed = packageObservableList.stream()
+                .filter(p -> !p.getService().equals("DPD Classic")) // InPost
+                .filter(p -> !p.getInpostStatus().getValue().equals(DONE_VALID.name())) // Status not VALID
+                .filter(p -> {
+                    logger.info("Inpost: {}", p.getId());
+                    try {
+                        inPostWebApi.verifyInPostId(p.getInPostId());
+                        p.getInpostStatus().setValue(DONE_VALID.name());
+                        return false;
+                    } catch (IOException | RuntimeException e) {
+                        logger.info("Inpost validation failed: {}", e.getMessage());
+                        p.getInpostStatus().setValue(DONE_INVALID.name());
+                    }
+                    return true;
+                })
+                .count();
+        return failed == 0;
     }
 }

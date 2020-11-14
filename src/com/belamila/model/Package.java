@@ -18,7 +18,7 @@ import lombok.ToString;
 public class Package {
 
     public enum InpostStatus {
-        UNKNOWN, RUNNING, DONE_VALID, DONE_INVALID
+        UNKNOWN, DONE_VALID, DONE_INVALID
     }
 
     private String id;

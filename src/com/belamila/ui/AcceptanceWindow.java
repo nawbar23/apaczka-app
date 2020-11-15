@@ -79,6 +79,7 @@ public class AcceptanceWindow implements Initializable {
                 Scene scene = new Scene(root);
                 window = new Stage();
                 window.setScene(scene);
+                window.setTitle("Podsumowanie");
                 window.setOnCloseRequest(event -> close());
                 window.show();
 

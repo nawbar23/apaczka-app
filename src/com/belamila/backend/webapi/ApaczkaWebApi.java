@@ -29,7 +29,6 @@ public class ApaczkaWebApi {
     private static final String APP_ID = ApaczkaKeys.APP_ID;
     private static final String APP_SECRET = ApaczkaKeys.APP_SECRET;
 
-    private final InPostWebApi inPostWebApi = new InPostWebApi();
     private final OkHttpClient client = new OkHttpClient();
 
     private final ProgressListener listener;
@@ -39,13 +38,6 @@ public class ApaczkaWebApi {
     }
 
     public void issueOrdersAndDownloadCards(List<Package> packages, File file) {
-//        for (Package p : packages) {
-//            if (p.getService().equals("INPOST")) {
-//                inPostWebApi.verifyInPostId(p.getInPostId());
-//            }
-//            valuateOrder(p);
-//        }
-
         int i = 1;
         int successes = 0;
         for (Package p : packages) {

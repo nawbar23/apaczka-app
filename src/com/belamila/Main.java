@@ -3,6 +3,7 @@ package com.belamila;
 import com.belamila.backend.excel.ExcelBuilder;
 import com.belamila.backend.parser.Parser;
 import com.belamila.backend.webapi.ApaczkaWebApi;
+import com.belamila.backend.webapi.InPostWebApi;
 import com.belamila.model.Package;
 import com.belamila.ui.AcceptanceWindow;
 import com.belamila.ui.ProgressListener;
@@ -33,6 +34,10 @@ public class Main extends Application implements ProgressListener {
     private final ExecutorService executorService = Executors.newCachedThreadPool();
 
     private TextArea summary;
+
+    private ExcelBuilder excelBuilder;
+    private ApaczkaWebApi apaczkaWebApi;
+    private InPostWebApi inPostWebApi;
 
     @Override
     public void start(Stage primaryStage) {
@@ -80,6 +85,10 @@ public class Main extends Application implements ProgressListener {
             Platform.exit();
         });
         primaryStage.show();
+
+        excelBuilder = new ExcelBuilder(this);
+        apaczkaWebApi = new ApaczkaWebApi(this);
+        inPostWebApi = new InPostWebApi();
     }
 
     private void onDragHandle(File file) {
@@ -99,16 +108,16 @@ public class Main extends Application implements ProgressListener {
         List<Package> packages = new Parser().parse(file);
         packages.sort((p1, p2) -> Integer.valueOf(p2.getId()).compareTo(Integer.valueOf(p1.getId())));
 
-        AcceptanceWindow.Result result = AcceptanceWindow.verify(packages);
+        AcceptanceWindow.Result result = AcceptanceWindow.verify(packages, inPostWebApi);
         logger.info("Acceptance result: {}, packages: {}", result, packages);
         onProgressUpdated("Starting " + result.toString() + "...\n");
 
         switch (result) {
             case EXCEL:
-                new ExcelBuilder(this).buildAndSafe(packages, file);
+                excelBuilder.buildAndSafe(packages, file);
                 return;
             case WEB_API:
-                new ApaczkaWebApi(this).issueOrdersAndDownloadCards(packages, file);
+                apaczkaWebApi.issueOrdersAndDownloadCards(packages, file);
                 return;
             default:
                 throw new RuntimeException("Incorrect window result");

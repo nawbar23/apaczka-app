@@ -24,9 +24,12 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ResourceBundle;
 
-import static com.belamila.model.Package.InpostStatus.*;
+import static com.belamila.model.Package.InpostStatus.DONE_INVALID;
+import static com.belamila.model.Package.InpostStatus.DONE_VALID;
 
 /**
  * Created by: Bartosz Nawrot
@@ -48,10 +51,13 @@ public class AcceptanceWindow implements Initializable {
     @FXML
     private Button buttonWebApi;
 
-    private ObservableList<Package> packageObservableList;
+    private final ObservableList<Package> packageObservableList;
 
     @Setter
     private List<Package> packages;
+
+    @Setter
+    private InPostWebApi inPostWebApi;
 
     private static final Boolean condition = true;
     private static Exception exception;
@@ -65,7 +71,7 @@ public class AcceptanceWindow implements Initializable {
                 pack -> new Observable[] { pack.getInpostStatus() });
     }
 
-    public static Result verify(List<Package> packages) throws Exception {
+    public static Result verify(List<Package> packages, InPostWebApi inPostWebApi) throws Exception {
         Platform.runLater(() -> {
             exception = null;
             result = null;
@@ -76,6 +82,7 @@ public class AcceptanceWindow implements Initializable {
                 Parent root = fxmlLoader.load();
                 AcceptanceWindow controller = fxmlLoader.getController();
                 controller.setPackages(packages);
+                controller.setInPostWebApi(inPostWebApi);
                 Scene scene = new Scene(root);
                 window = new Stage();
                 window.setScene(scene);
@@ -147,8 +154,6 @@ public class AcceptanceWindow implements Initializable {
             condition.notify();
         }
     }
-
-    private static final InPostWebApi inPostWebApi = new InPostWebApi();
 
     private boolean validateInpost() {
         long failed = packageObservableList.stream()

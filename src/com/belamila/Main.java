@@ -29,6 +29,8 @@ import java.util.concurrent.Executors;
 
 public class Main extends Application implements ProgressListener {
 
+    private static final int ESTIMATED_PACKED_FEE_PLN = 15;
+
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     private final ExecutorService executorService = Executors.newCachedThreadPool();
@@ -108,6 +110,11 @@ public class Main extends Application implements ProgressListener {
         List<Package> packages = new Parser().parse(file);
         packages.sort((p1, p2) -> Integer.valueOf(p2.getId()).compareTo(Integer.valueOf(p1.getId())));
 
+        if (!checkApaczkaBalance(packages)) {
+            logger.info("Logic canceled by user due to lack of money :(");
+            return;
+        }
+
         AcceptanceWindow.Result result = AcceptanceWindow.verify(packages, inPostWebApi);
         logger.info("Acceptance result: {}, packages: {}", result, packages);
         onProgressUpdated("Starting " + result.toString() + "...\n");
@@ -122,6 +129,15 @@ public class Main extends Application implements ProgressListener {
             default:
                 throw new RuntimeException("Incorrect window result");
         }
+    }
+
+    private boolean checkApaczkaBalance(List<Package> packages) {
+        int size = packages.size();
+        double estimated = size * ESTIMATED_PACKED_FEE_PLN;
+        double have = apaczkaWebApi.getAccountBalance();
+        logger.info("Estimated cost: {}PLN, available on apaczka: {}PLN", estimated, have);
+        // TODO if not enough: inform user and check if he want to continue
+        return true;
     }
 
     @Override

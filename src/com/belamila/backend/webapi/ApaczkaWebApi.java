@@ -150,4 +150,9 @@ public class ApaczkaWebApi {
         sha256.init(secret_key);
         return Hex.encodeHexString(sha256.doFinal(data.getBytes(StandardCharsets.UTF_8)));
     }
+
+    public double getAccountBalance() {
+        // TODO implement when Apaczka endpoint will be there...
+        return Integer.MAX_VALUE;
+    }
 }

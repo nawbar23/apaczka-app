@@ -14,6 +14,7 @@ public class Order {
     public static JSONObject build(Package p) {
         JSONObject json = getOrderTemplate();
         json.put("service_id", getServiceId(p.getService()));
+        json.put("content", "BELAMILA.PL (" + p.getId() + ")");
 
         JSONObject receiver = new JSONObject();
         receiver.put("country_code", "PL");
@@ -90,7 +91,6 @@ public class Order {
         template.put("cod", cod);
 
         template.put("comment", "Say hello to your BELAMILA!");
-        template.put("content", "BELAMILA.PL");
 
         return template;
     }

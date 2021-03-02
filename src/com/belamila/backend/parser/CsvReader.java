@@ -59,13 +59,12 @@ public class CsvReader {
     }
 
     private String parseService(String deliveryMethod) throws RuntimeException {
-        if (deliveryMethod.equals("Kurier DPD ")
-                || deliveryMethod.equals("Kurier DPD")
-                || deliveryMethod.equals("DPD In Advance ")
-                || deliveryMethod.equals("DPD Pobranie ")) {
+        if (deliveryMethod.contains("Kurier DPD")
+                || deliveryMethod.contains("DPD In Advance")
+                || deliveryMethod.contains("DPD Pobranie")) {
             return "DPD Classic";
-        } else if (deliveryMethod.equals("Paczkomaty InPost Proszę o maila z danymi paczkomatu")
-                || deliveryMethod.equals("Inpost Please, send an e-mail with parcel locker's details")) {
+        } else if (deliveryMethod.contains("Paczkomaty InPost Proszę o maila z danymi paczkomatu")
+                || deliveryMethod.contains("Inpost Please, send an e-mail with parcel locker's details")) {
             return "INPOST";
         } else {
             logger.warn("Unrecognized delivery method: {}", deliveryMethod);
@@ -75,7 +74,7 @@ public class CsvReader {
 
     private Double parseAmount(String deliveryMethod, String value) {
         double result = -1.0;
-        if (deliveryMethod.equals("DPD Pobranie ")) {
+        if (deliveryMethod.contains("DPD Pobranie")) {
             try {
                 result = Double.parseDouble(value);
             } catch (NumberFormatException ignored) { }

@@ -37,7 +37,8 @@ public class CsvReader {
         Map<String, List<String>> csv = loadCsv(file);
         ArrayList<Package> packages = new ArrayList<>();
         csv.forEach((key, val) -> {
-            String service = parseService(val.get(20));
+            logger.info("{}", val);
+            String service = parseService(val.get(23));
             if (service != null) {
                 Package pack = Package.builder()
                         .id(val.get(0))
@@ -45,10 +46,10 @@ public class CsvReader {
                         .receiver(val.get(10))
                         .address(val.get(15))
                         .city(val.get(14))
-                        .email(val.get(19))
+                        .email(val.get(22))
                         .zip(val.get(16).replace("\"", ""))
-                        .phone(val.get(17).replace("\"", ""))
-                        .amount(parseAmount(val.get(20), val.get(32)))
+                        .phone(val.get(20).replace("\"", ""))
+                        .amount(parseAmount(val.get(23), val.get(35)))
                         .build();
                 packages.add(pack);
                 logger.debug("{}", pack);
@@ -59,6 +60,7 @@ public class CsvReader {
 
     private String parseService(String deliveryMethod) throws RuntimeException {
         if (deliveryMethod.equals("Kurier DPD ")
+                || deliveryMethod.equals("Kurier DPD")
                 || deliveryMethod.equals("DPD In Advance ")
                 || deliveryMethod.equals("DPD Pobranie ")) {
             return "DPD Classic";
@@ -66,6 +68,7 @@ public class CsvReader {
                 || deliveryMethod.equals("Inpost Please, send an e-mail with parcel locker's details")) {
             return "INPOST";
         } else {
+            logger.warn("Unrecognized delivery method: {}", deliveryMethod);
             return null;
         }
     }
@@ -75,7 +78,7 @@ public class CsvReader {
         if (deliveryMethod.equals("DPD Pobranie ")) {
             try {
                 result = Double.parseDouble(value);
-            } catch (NumberFormatException ignored) { };
+            } catch (NumberFormatException ignored) { }
         }
         return result;
     }

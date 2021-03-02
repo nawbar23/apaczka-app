@@ -29,8 +29,6 @@ import java.util.concurrent.Executors;
 
 public class Main extends Application implements ProgressListener {
 
-    private static final int ESTIMATED_PACKED_FEE_PLN = 15;
-
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     private final ExecutorService executorService = Executors.newCachedThreadPool();

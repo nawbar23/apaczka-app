@@ -37,22 +37,22 @@ public class CsvReader {
         Map<String, List<String>> csv = loadCsv(file);
         ArrayList<Package> packages = new ArrayList<>();
         csv.forEach((key, val) -> {
-            logger.info("{}", val);
-            String service = parseService(val.get(23));
+            logger.info("Parsing: {}", val);
+            String service = parseService(val.get(7));
             if (service != null) {
                 Package pack = Package.builder()
                         .id(val.get(0))
                         .service(service)
-                        .receiver(val.get(10))
+                        .receiver(val.get(9))
                         .address(val.get(15))
                         .city(val.get(14))
-                        .email(val.get(22))
+                        .email(val.get(4))
                         .zip(val.get(16).replace("\"", ""))
-                        .phone(val.get(20).replace("\"", ""))
-                        .amount(parseAmount(val.get(23), val.get(35)))
+                        .phone(val.get(10).replace("\"", ""))
+                        .amount(parseAmount(val.get(7), val.get(31)))
                         .build();
                 packages.add(pack);
-                logger.debug("{}", pack);
+                logger.debug("Result: {}", pack);
             }
         });
         return packages;
@@ -63,8 +63,8 @@ public class CsvReader {
                 || deliveryMethod.contains("DPD In Advance")
                 || deliveryMethod.contains("DPD Pobranie")) {
             return "DPD Classic";
-        } else if (deliveryMethod.contains("Paczkomaty InPost Proszę o maila z danymi paczkomatu")
-                || deliveryMethod.contains("Inpost Please, send an e-mail with parcel locker's details")) {
+        } else if (deliveryMethod.contains("Paczkomaty InPost")
+                || deliveryMethod.contains("Inpost")) {
             return "INPOST";
         } else {
             logger.warn("Unrecognized delivery method: {}", deliveryMethod);

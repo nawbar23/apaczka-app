@@ -55,13 +55,13 @@ public class Order {
         JSONObject sender = new JSONObject();
         sender.put("country_code", "PL");
         sender.put("name", "BELAMILA");
-        sender.put("line1", "Wizjonerów 2/23");
+        sender.put("line1", "Wizjonerów 7/252");
         sender.put("postal_code", "31-356");
         sender.put("city", "Kraków");
         sender.put("contact_person", "Mila");
         sender.put("email", "sklep@belamila.pl");
         sender.put("phone", "+48889127157");
-        sender.put("foreign_address_id", "KRA28N");
+        sender.put("foreign_address_id", "KRA305N");
         address.put("sender", sender);
         template.put("address", address);
 

@@ -26,6 +26,8 @@ public class Parser {
         charset.setAccessible(true);
         charset.set(null, null);
 
+        logger.info("asd");
+
         logger.info("Parsing {}", file.toString());
         List<Package> packages = csvReader.read(file);
 

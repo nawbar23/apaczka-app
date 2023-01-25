@@ -32,10 +32,12 @@ public class InPostWebApi {
         Response response = client.newCall(request).execute();
         JSONObject responseJson = new JSONObject(response.body().string());
 
-        if (!response.isSuccessful()) {
+        logger.info("Response: {}", response);
+        logger.info("Body: {}", responseJson);
+
+        if (!response.isSuccessful() || !responseJson.get("status").equals("Operating")) {
             logger.warn("Request:{} failed:{}", request, response);
-            throw new RuntimeException("InPostId: " + inPostId + " validation failed: "
-                    + responseJson.getString("message"));
+            throw new RuntimeException("InPostId: " + inPostId + " validation failed");
         }
     }
 }

@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.IntStream;
 
 /**
  * Created by: Bartosz Nawrot
@@ -38,6 +39,7 @@ public class CsvReader {
         ArrayList<Package> packages = new ArrayList<>();
         csv.forEach((key, val) -> {
             logger.info("Parsing: {}", val);
+            //printFieldsWithIds(val);
             String service = parseService(val.get(7));
             if (service != null) {
                 Package pack = Package.builder()
@@ -49,7 +51,7 @@ public class CsvReader {
                         .email(val.get(4))
                         .zip(val.get(16).replace("\"", ""))
                         .phone(val.get(10).replace("\"", ""))
-                        .amount(parseAmount(val.get(7), val.get(31)))
+                        .amount(parseAmount(val.get(7), val.get(32)))
                         .build();
                 packages.add(pack);
                 logger.debug("Result: {}", pack);
@@ -80,5 +82,10 @@ public class CsvReader {
             } catch (NumberFormatException ignored) { }
         }
         return result;
+    }
+
+    private void printFieldsWithIds(List<String> val) {
+        IntStream.range(0, val.size())
+                .forEach(i -> logger.info("Filed: {}: {}", i, val.get(i)));
     }
 }

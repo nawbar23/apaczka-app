@@ -142,7 +142,7 @@ public class AcceptanceWindow implements Initializable {
     }
 
     private void onFinished(Result res) {
-        if (!validateInpost()) {
+        if (!validateInPost()) {
             Alert alert = new Alert(Alert.AlertType.WARNING,
                     "Wrong InPost ID", ButtonType.CLOSE);
             alert.showAndWait();
@@ -155,18 +155,18 @@ public class AcceptanceWindow implements Initializable {
         }
     }
 
-    private boolean validateInpost() {
+    private boolean validateInPost() {
         long failed = packageObservableList.stream()
-                .filter(p -> !p.getService().equals("DPD Classic")) // InPost
+                .filter(Package::isInPost) // InPost
                 .filter(p -> !p.getInpostStatus().getValue().equals(DONE_VALID.name())) // Status not VALID
                 .filter(p -> {
-                    logger.info("Inpost: {}", p.getId());
+                    logger.info("InPost: {}", p.getId());
                     try {
                         inPostWebApi.verifyInPostId(p.getInPostId());
                         p.getInpostStatus().setValue(DONE_VALID.name());
                         return false;
                     } catch (IOException | RuntimeException e) {
-                        logger.info("Inpost validation failed: {}", e.getMessage());
+                        logger.info("InPost validation failed: {}", e.getMessage());
                         p.getInpostStatus().setValue(DONE_INVALID.name());
                     }
                     return true;

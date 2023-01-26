@@ -108,6 +108,18 @@ public class Main extends Application implements ProgressListener {
         List<Package> packages = new Parser().parse(file);
         packages.sort((p1, p2) -> Integer.valueOf(p2.getId()).compareTo(Integer.valueOf(p1.getId())));
 
+        packages.stream()
+                .filter(Package::isInPost)
+                .forEach(p -> {
+                    onProgressUpdated("Finding InPost for order ID: " + p.getId() + "... ");
+                    try {
+                        p.setInPostId(inPostWebApi.suggestInPost(p));
+                        onProgressUpdated("Done! " + p.getInPostId() + "\n");
+                    } catch (Exception e) {
+                        onProgressUpdated("Failed! " + e.getMessage() + "\n");
+                    }
+                });
+
         AcceptanceWindow.Result result = AcceptanceWindow.verify(packages, inPostWebApi);
         logger.info("Acceptance result: {}, packages: {}", result, packages);
         onProgressUpdated("Starting " + result.toString() + "...\n");

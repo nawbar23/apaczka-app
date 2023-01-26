@@ -35,6 +35,10 @@ public class Package {
 
     private Double amount;
 
+    public boolean isInPost() {
+        return !service.equals("DPD Classic");
+    }
+
     public String getServiceName() {
         if (getService().equals("INPOST")) {
             return  "InPost - ";

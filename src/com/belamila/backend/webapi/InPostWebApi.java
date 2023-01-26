@@ -22,21 +22,42 @@ public class InPostWebApi {
 
     private final OkHttpClient client = new OkHttpClient();
 
-    public String suggestInPost(Package pack) throws RuntimeException, IOException {
+    public JSONObject findInPost(Package pack) throws RuntimeException, IOException {
         String addressKey = (pack.getAddress() + ", " + pack.getCity() + ", " + pack.getZip())
                 .replace(" ", "+");
-        logger.info("Id: {}, address to be geo localized: {}", pack.getId(), addressKey);
 
-        // TODO geo localize
+        Request googleRequest = new Request.Builder()
+                .method("GET", null)
+                .url("https://maps.googleapis.com/maps/api/geocode/json?address=" + addressKey
+                        + "&key=" + GoogleKeys.KEY)
+                .build();
 
-        // TODO find parcel by lat and lon
+        Response googleResponse = client.newCall(googleRequest).execute();
+        logger.info("Geo localizing ID: {}, response: {}", pack.getId(), googleResponse);
 
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException ignored) {
-        }
+        JSONObject location = new JSONObject(googleResponse.body().string())
+                .getJSONArray("results")
+                .getJSONObject(0)
+                .getJSONObject("geometry")
+                .getJSONObject("location");
+        logger.info("Location: {}", location);
 
-        return null;
+        String point = location.getDouble("lat") + "," + location.getDouble("lng");
+        Request request = new Request.Builder()
+                .method("GET", null)
+                .url("https://api-shipx-pl.easypack24.net/v1/points?relative_point=" + point
+                        + "&sort_by=distance_to_relative_point&fields=name,distance,status")
+                .addHeader("Authorization", InPostKeys.APP_TOKEN)
+                .build();
+
+        Response response = client.newCall(request).execute();
+        logger.info("Finding parcel for ID: {}, response: {}", pack.getId(), response);
+
+        JSONObject result = new JSONObject(response.body().string())
+                .getJSONArray("items").getJSONObject(0);
+        logger.info("Parcel for ID: {} found: {}", pack.getId(), result);
+
+        return result;
     }
 
     public void verifyInPostId(String inPostId) throws RuntimeException, IOException {

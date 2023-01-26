@@ -19,6 +19,7 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -113,8 +114,12 @@ public class Main extends Application implements ProgressListener {
                 .forEach(p -> {
                     onProgressUpdated("Finding InPost for order ID: " + p.getId() + "... ");
                     try {
-                        p.setInPostId(inPostWebApi.suggestInPost(p));
-                        onProgressUpdated("Done! " + p.getInPostId() + "\n");
+                        JSONObject inPost = inPostWebApi.findInPost(p);
+                        onProgressUpdated("Done! " + inPost.getString("name")
+                                + ", " + inPost.getInt("distance") + "m"
+                                + ", " + inPost.getString("status") + "\n");
+                        p.setInPostId(inPost.getString("name"));
+
                     } catch (Exception e) {
                         onProgressUpdated("Failed! " + e.getMessage() + "\n");
                     }

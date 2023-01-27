@@ -99,7 +99,7 @@ public class Main extends Application implements ProgressListener {
             logger.warn("", e);
             Platform.runLater(() -> {
                 onProgressUpdated("Finished after error :(");
-                Alert alert = new Alert(Alert.AlertType.ERROR, e.toString(), ButtonType.CLOSE);
+                Alert alert = new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.CLOSE);
                 alert.showAndWait();
             });
         }
@@ -115,9 +115,8 @@ public class Main extends Application implements ProgressListener {
                     onProgressUpdated("Finding InPost for order ID: " + p.getId() + "... ");
                     try {
                         JSONObject inPost = inPostWebApi.findInPost(p);
-                        onProgressUpdated("Done! " + inPost.getString("name")
-                                + ", " + inPost.getInt("distance") + "m"
-                                + ", " + inPost.getString("status") + "\n");
+                        onProgressUpdated(inPost.getString("name")
+                                + ", " + inPost.getInt("distance") + "m\n");
                         p.setInPostId(inPost.getString("name"));
 
                     } catch (Exception e) {

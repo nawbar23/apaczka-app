@@ -4,12 +4,15 @@ import com.belamila.model.Package;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Created by: Bartosz Nawrot
@@ -53,10 +56,15 @@ public class InPostWebApi {
         Response response = client.newCall(request).execute();
         logger.info("Finding parcel for ID: {}, response: {}", pack.getId(), response);
 
-        JSONObject result = new JSONObject(response.body().string())
-                .getJSONArray("items").getJSONObject(0);
-        logger.info("Parcel for ID: {} found: {}", pack.getId(), result);
+        JSONArray results = new JSONObject(response.body().string())
+                .getJSONArray("items");
+        JSONObject result =  IntStream.range(0, results.length())
+                .mapToObj(index -> (JSONObject) results.get(index))
+                .filter(this::isOperating)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No operating parcel found"));
 
+        logger.info("Parcel for ID: {} found: {}", pack.getId(), result);
         return result;
     }
 
@@ -75,9 +83,13 @@ public class InPostWebApi {
         logger.info("Response: {}", response);
         logger.info("Body: {}", responseJson);
 
-        if (!response.isSuccessful() || !responseJson.get("status").equals("Operating")) {
+        if (!response.isSuccessful() || !isOperating(responseJson)) {
             logger.warn("Request:{} failed:{}", request, response);
             throw new RuntimeException("InPostId: " + inPostId + " validation failed");
         }
+    }
+
+    boolean isOperating(JSONObject parcel) {
+        return parcel.get("status").equals("Operating");
     }
 }

@@ -66,6 +66,7 @@ public class CsvReader {
                 || deliveryMethod.contains("DPD Pobranie")) {
             return "DPD Classic";
         } else if (deliveryMethod.contains("Paczkomaty InPost")
+                || deliveryMethod.contains("Paczkomat InPost")
                 || deliveryMethod.contains("Inpost")) {
             return "INPOST";
         } else {

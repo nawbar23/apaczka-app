@@ -51,7 +51,7 @@ public class CsvReader {
                         .email(val.get(4))
                         .zip(val.get(16).replace("\"", ""))
                         .phone(val.get(10).replace("\"", ""))
-                        .amount(parseAmount(val.get(7), val.get(32)))
+                        .amount(parseAmount(val.get(7), val.get(31)))
                         .build();
                 packages.add(pack);
                 logger.debug("Result: {}", pack);

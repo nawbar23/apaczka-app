@@ -39,7 +39,7 @@ public class CsvReader {
         ArrayList<Package> packages = new ArrayList<>();
         csv.forEach((key, val) -> {
             logger.info("Parsing: {}", val);
-            //printFieldsWithIds(val);
+            printFieldsWithIds(val);
             String service = parseService(val.get(7));
             if (service != null) {
                 Package pack = Package.builder()
@@ -81,6 +81,10 @@ public class CsvReader {
             try {
                 result = Double.parseDouble(value);
             } catch (NumberFormatException ignored) { }
+            if (result < 0.0) {
+                logger.warn("Wrong value: {} for delivery method: {}", value, deliveryMethod);
+                throw new RuntimeException("Brak kwoty do paczki pobraniowej!");
+            }
         }
         return result;
     }

@@ -132,13 +132,13 @@ public class WooWebApi {
         if (deliveryMethod.contains("Kurier DPD pobranie")) {
             try {
                 amount = Double.parseDouble(value);
-                pack.setAmount(amount);
             } catch (NumberFormatException ignored) { }
             if (amount < 0.0) {
                 log.warn("Wrong value: {} for delivery method: {}", value, deliveryMethod);
                 throw new RuntimeException("Brak kwoty do paczki pobraniowej!");
             }
         }
+        pack.setAmount(amount);
     }
 
     private void parseInpostId(Package pack, JSONObject p) {

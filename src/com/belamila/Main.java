@@ -93,7 +93,7 @@ public class Main extends Application implements ProgressListener {
         onProgressUpdated("Zaczynamy " + result.toString() + "...\n");
 
         if (result == AcceptanceWindow.Result.WEB_API) {
-            String downloads = System.getProperty("user.home")+ "\\Download";
+            String downloads = System.getProperty("user.home")+ "\\Downloads";
             apaczkaWebApi.issueOrdersAndDownloadCards(packages, downloads);
             return;
         }

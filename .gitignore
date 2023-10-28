@@ -101,3 +101,4 @@ log/
 src/com/belamila/backend/webapi/ApaczkaKeys.java
 src/com/belamila/backend/webapi/InPostKeys.java
 src/com/belamila/backend/webapi/GoogleKeys.java
+src/com/belamila/backend/webapi/WooKeys.java

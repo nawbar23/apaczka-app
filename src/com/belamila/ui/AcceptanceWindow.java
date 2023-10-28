@@ -46,9 +46,6 @@ public class AcceptanceWindow implements Initializable {
     private ListView<Package> listView;
 
     @FXML
-    private Button buttonExcel;
-
-    @FXML
     private Button buttonWebApi;
 
     private final ObservableList<Package> packageObservableList;
@@ -112,7 +109,7 @@ public class AcceptanceWindow implements Initializable {
         }
 
         if (result == null) {
-            throw new RuntimeException("Acceptance window closed without result!");
+            throw new RuntimeException("Szkoda, że nie nadajemy");
         }
 
         packages.clear();
@@ -129,7 +126,6 @@ public class AcceptanceWindow implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         buttonWebApi.setOnAction(event -> onFinished(Result.WEB_API));
-        buttonExcel.setOnAction(event -> onFinished(Result.EXCEL));
         Platform.runLater(() -> {
             logger.info("Initialize: {}", packages);
             packages.forEach(p -> p.setInpostStatus(

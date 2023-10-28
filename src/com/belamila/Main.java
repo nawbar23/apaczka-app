@@ -1,9 +1,8 @@
 package com.belamila;
 
-import com.belamila.backend.excel.ExcelBuilder;
-import com.belamila.backend.parser.Parser;
 import com.belamila.backend.webapi.ApaczkaWebApi;
 import com.belamila.backend.webapi.InPostWebApi;
+import com.belamila.backend.webapi.WooWebApi;
 import com.belamila.model.Package;
 import com.belamila.ui.AcceptanceWindow;
 import com.belamila.ui.ProgressListener;
@@ -14,16 +13,12 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.TransferMode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -36,45 +31,27 @@ public class Main extends Application implements ProgressListener {
 
     private TextArea summary;
 
-    private ExcelBuilder excelBuilder;
     private ApaczkaWebApi apaczkaWebApi;
     private InPostWebApi inPostWebApi;
+
+    private WooWebApi wooWebApi;
 
     @Override
     public void start(Stage primaryStage) {
         logger.info("Apaczka app started");
-        Label label = new Label("Drag and drop orders Wix CSV file");
-        Label dropped = new Label("");
+
+        Label label = new Label("Pamiętaj, żeby zawsze dobrze się bawić! (:");
+
         summary = new TextArea("");
         summary.setEditable(false);
         summary.setPrefRowCount(25);
-        VBox dragTarget = new VBox();
-        dragTarget.getChildren().addAll(label, dropped, summary);
-        dragTarget.setOnDragOver(event -> {
-            if (event.getGestureSource() != dragTarget
-                    && event.getDragboard().hasFiles()) {
-                event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-            }
-            event.consume();
-        });
 
-        dragTarget.setOnDragDropped(event -> {
-            Dragboard db = event.getDragboard();
-            boolean success = false;
-            if (db.hasFiles()) {
-                logger.info("Dropped event {}", db.getString());
-                File file = db.getFiles().get(0);
-                dropped.setText(file.toString());
-                summary.setText("");
-                executorService.execute(() -> onDragHandle(file));
-                success = true;
-            }
-            event.setDropCompleted(success);
-            event.consume();
-        });
+        VBox view = new VBox();
+        view.getChildren().addAll(label, summary);
+
 
         StackPane root = new StackPane();
-        root.getChildren().add(dragTarget);
+        root.getChildren().add(view);
 
         Scene scene = new Scene(root, 700, 550);
 
@@ -87,57 +64,41 @@ public class Main extends Application implements ProgressListener {
         });
         primaryStage.show();
 
-        excelBuilder = new ExcelBuilder(this);
         apaczkaWebApi = new ApaczkaWebApi(this);
         inPostWebApi = new InPostWebApi();
+        wooWebApi = new WooWebApi(this);
+
+        executorService.execute(this::run);
     }
 
-    private void onDragHandle(File file) {
+    private void run() {
         try {
-            executeLogic(file);
+            executeLogic();
         } catch (Exception e) {
             logger.warn("", e);
             Platform.runLater(() -> {
-                onProgressUpdated("Finished after error :(");
+                onProgressUpdated("Coś poszło bardzo nie tak :(");
+                logger.info(e.getMessage());
                 Alert alert = new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.CLOSE);
                 alert.showAndWait();
             });
         }
     }
 
-    private void executeLogic(File file) throws Exception {
-        List<Package> packages = new Parser().parse(file);
-        packages.sort((p1, p2) -> Integer.valueOf(p2.getId()).compareTo(Integer.valueOf(p1.getId())));
-
-        packages.stream()
-                .filter(Package::isInPost)
-                .forEach(p -> {
-                    onProgressUpdated("Finding InPost for order ID: " + p.getId() + "... ");
-                    try {
-                        JSONObject inPost = inPostWebApi.findInPost(p);
-                        onProgressUpdated(inPost.getString("name")
-                                + ", " + inPost.getInt("distance") + "m\n");
-                        p.setInPostId(inPost.getString("name"));
-
-                    } catch (Exception e) {
-                        onProgressUpdated("Failed! " + e.getMessage() + "\n");
-                    }
-                });
+    private void executeLogic() throws Exception {
+        List<Package> packages = wooWebApi.fetchOrders();
 
         AcceptanceWindow.Result result = AcceptanceWindow.verify(packages, inPostWebApi);
         logger.info("Acceptance result: {}, packages: {}", result, packages);
-        onProgressUpdated("Starting " + result.toString() + "...\n");
+        onProgressUpdated("Zaczynamy " + result.toString() + "...\n");
 
-        switch (result) {
-            case EXCEL:
-                excelBuilder.buildAndSafe(packages, file);
-                return;
-            case WEB_API:
-                apaczkaWebApi.issueOrdersAndDownloadCards(packages, file);
-                return;
-            default:
-                throw new RuntimeException("Incorrect window result");
+
+        if (result == AcceptanceWindow.Result.WEB_API) {
+            String downloads = System.getProperty("user.home")+ "\\Download";
+            apaczkaWebApi.issueOrdersAndDownloadCards(packages, downloads);
+            return;
         }
+        throw new RuntimeException("To się nie powinno zdażyć");
     }
 
     @Override

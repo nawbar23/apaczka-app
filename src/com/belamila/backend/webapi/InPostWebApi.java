@@ -22,8 +22,8 @@ import java.util.stream.IntStream;
 public class InPostWebApi {
 
     private static final Logger logger = LoggerFactory.getLogger(InPostWebApi.class);
-
     private final OkHttpClient client = new OkHttpClient();
+
 
     public JSONObject findInPost(Package pack) throws RuntimeException, IOException {
         String addressKey = (pack.getAddress() + ", " + pack.getCity() + ", " + pack.getZip())

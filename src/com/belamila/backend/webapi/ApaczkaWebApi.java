@@ -37,7 +37,7 @@ public class ApaczkaWebApi {
         this.listener = listener;
     }
 
-    public void issueOrdersAndDownloadCards(List<Package> packages, File file) {
+    public void issueOrdersAndDownloadCards(List<Package> packages, String path) {
         int i = 1;
         int successes = 0;
         for (Package p : packages) {
@@ -51,7 +51,7 @@ public class ApaczkaWebApi {
                 JSONObject send = sendOrder(p);
                 JSONObject waybill = downloadWaybill(
                         send.getJSONObject("order").getInt("id"));
-                safeWaybill(waybill.getString("waybill"), p, file);
+                safeWaybill(waybill.getString("waybill"), p, path);
                 successes++;
                 progress.append(send.getJSONObject("order").getString("waybill_number"));
 
@@ -68,12 +68,12 @@ public class ApaczkaWebApi {
                 + packages.size() + " packages with WebApi :)");
     }
 
-    public void safeWaybill(String pdfBase64, Package p, File input) throws Exception {
+    public void safeWaybill(String pdfBase64, Package p, String path) throws Exception {
         String fileName;
         fileName = p.getServiceName();
         fileName += p.getId() + " - " + p.getReceiver() + ".pdf";
 
-        File file = new File(input.getParent() + "\\" + fileName);
+        File file = new File(path + "\\" + fileName);
         FileOutputStream fop = new FileOutputStream(file);
         fop.write(new BASE64Decoder().decodeBuffer(pdfBase64));
         fop.flush();

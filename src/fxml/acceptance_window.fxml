@@ -9,8 +9,7 @@
       <ListView fx:id="listView" prefHeight="571.0" prefWidth="700.0" />
       <ButtonBar prefHeight="40.0" prefWidth="200.0">
         <buttons>
-          <Button fx:id="buttonExcel" mnemonicParsing="false" text="Excel" />
-            <Button fx:id="buttonWebApi" mnemonicParsing="false" text="WebApi" />
+            <Button fx:id="buttonWebApi" mnemonicParsing="false" text="Brrrum!" />
         </buttons>
          <VBox.margin>
             <Insets bottom="5.0" left="5.0" top="5.0" />

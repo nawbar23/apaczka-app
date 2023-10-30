@@ -38,7 +38,7 @@ import static com.belamila.model.Package.InpostStatus.DONE_VALID;
  */
 public class AcceptanceWindow implements Initializable {
 
-    public enum Result { EXCEL, WEB_API }
+    public enum Result { WEB_API }
 
     private static final Logger logger = LoggerFactory.getLogger(AcceptanceWindow.class);
 

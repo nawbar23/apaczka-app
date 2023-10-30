@@ -68,7 +68,7 @@ public class WooWebApi {
                 continue;
             }
             Package pack = Package.builder()
-                    .id(String.valueOf(p.getInt("id")))
+                    .id(String.valueOf(p.getInt("number")))
                     .service(service)
                     .build();
             parseAddress(pack, p);

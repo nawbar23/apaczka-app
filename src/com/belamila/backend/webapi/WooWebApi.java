@@ -84,9 +84,11 @@ public class WooWebApi {
     }
 
     private String parseService(JSONObject pack) throws RuntimeException {
-        JSONObject shippingLines = pack
-                .getJSONArray("shipping_lines")
-                .getJSONObject(0);
+        JSONArray shippingData = pack.getJSONArray("shipping_lines");
+        if (shippingData.isEmpty()) {
+            throw new RuntimeException("Brak danych do wysyłki dla zamówienia numer: " + pack.getInt("number"));
+        }
+        JSONObject shippingLines = shippingData.getJSONObject(0);
         String deliveryMethod = shippingLines.getString("method_title");
         if (deliveryMethod.contains("Kurier DPD")
                 || deliveryMethod.contains("Darmowa dostawa: Kurier DPD")

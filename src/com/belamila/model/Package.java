@@ -1,10 +1,9 @@
 package com.belamila.model;
 
 import javafx.beans.property.StringProperty;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
+
+import java.util.List;
 
 /**
  * Created by: Bartosz Nawrot
@@ -33,7 +32,22 @@ public class Package {
     private String inPostId;
     private StringProperty inpostStatus;
 
+    private Boolean isCod;
     private Double amount;
+
+    private String shippingLabel;
+    private List<Item> items;
+
+    @Data
+    @Builder
+    public static class Item {
+
+        private String label;
+        private Integer quantity;
+        private Double total;
+
+        private Boolean isBagRequested;
+    }
 
     public boolean isInPost() {
         return !service.equals("DPD Classic");

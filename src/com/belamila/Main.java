@@ -1,5 +1,6 @@
 package com.belamila;
 
+import com.belamila.backend.pdf.PdfPrinter;
 import com.belamila.backend.webapi.ApaczkaWebApi;
 import com.belamila.backend.webapi.InPostWebApi;
 import com.belamila.backend.webapi.WooWebApi;
@@ -34,6 +35,8 @@ public class Main extends Application implements ProgressListener {
     private ApaczkaWebApi apaczkaWebApi;
     private InPostWebApi inPostWebApi;
 
+    private PdfPrinter pdfPrinter;
+
     private WooWebApi wooWebApi;
 
     @Override
@@ -66,6 +69,7 @@ public class Main extends Application implements ProgressListener {
 
         apaczkaWebApi = new ApaczkaWebApi(this);
         inPostWebApi = new InPostWebApi();
+        pdfPrinter = new PdfPrinter();
         wooWebApi = new WooWebApi(this);
 
         executorService.execute(this::run);
@@ -95,6 +99,7 @@ public class Main extends Application implements ProgressListener {
         if (result == AcceptanceWindow.Result.WEB_API) {
             String downloads = System.getProperty("user.home")+ "\\Downloads";
             apaczkaWebApi.issueOrdersAndDownloadCards(packages, downloads);
+            pdfPrinter.printSummary(packages, downloads);
             return;
         }
         throw new RuntimeException("To się nie powinno zdażyć");

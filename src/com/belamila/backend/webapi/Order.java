@@ -32,7 +32,7 @@ public class Order {
         }
         json.getJSONObject("address").put("receiver", receiver);
 
-        if (p.getAmount() > 0.0) {
+        if (p.getIsCod()) {
             json.getJSONObject("cod").put("amount", p.getAmount() * 100.0);
         }
 

@@ -10,6 +10,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -17,7 +18,7 @@ import java.util.Objects;
 @Slf4j
 public class WooWebApi {
 
-    private static final Integer ORDERS_PER_PAGE = 50;
+    private static final Integer ORDERS_PER_PAGE = 100;
 
     private static final String STATUSES = "processing";
 
@@ -72,7 +73,8 @@ public class WooWebApi {
                     .service(service)
                     .build();
             parseAddress(pack, p);
-            parseAmount(pack, p);
+            parsePayment(pack, p);
+            parseItems(pack, p);
             if (pack.isInPost()) {
                 parseInpostId(pack, p);
             }
@@ -95,7 +97,7 @@ public class WooWebApi {
                 || deliveryMethod.contains("Kurier DPD pobranie")) {
             return "DPD Classic";
         } else if (deliveryMethod.contains("InPost Paczkomat")
-                || deliveryMethod.contains("Darmowa dostawa: InPost Paczkomat")) {
+                || deliveryMethod.contains("Darmowa dostawa, paczkomat InPost")) {
             return "INPOST";
         } else {
             log.warn("Unrecognized delivery method: {}", deliveryMethod);
@@ -124,23 +126,29 @@ public class WooWebApi {
         }
     }
 
-    private void parseAmount(Package pack, JSONObject p) {
+    private void parsePayment(Package pack, JSONObject p) {
         JSONObject shippingLines = p
                 .getJSONArray("shipping_lines")
                 .getJSONObject(0);
         String deliveryMethod = shippingLines.getString("method_title");
-        String value = p.getString("total");
-        double amount = -1.0;
-        if (deliveryMethod.contains("Kurier DPD pobranie")) {
-            try {
-                amount = Double.parseDouble(value);
-            } catch (NumberFormatException ignored) { }
-            if (amount < 0.0) {
-                log.warn("Wrong value: {} for delivery method: {}", value, deliveryMethod);
-                throw new RuntimeException("Brak kwoty do paczki pobraniowej!");
-            }
+        pack.setAmount(p.getDouble("total"));
+        pack.setIsCod(deliveryMethod.contains("Kurier DPD pobranie"));
+        pack.setShippingLabel(deliveryMethod);
+    }
+
+    private void parseItems(Package pack, JSONObject p) {
+        JSONArray lineItems = p.getJSONArray("line_items");
+        ArrayList<Package.Item> items = new ArrayList<>();
+        for (int i = 0; i < lineItems.length(); i++) {
+            JSONObject item = lineItems.getJSONObject(i);
+            items.add(Package.Item.builder()
+                    .label(item.getString("name"))
+                    .quantity(item.getInt("quantity"))
+                    .total(item.getDouble("total"))
+                    .isBagRequested(hasMetaId45539(item))
+                    .build());
         }
-        pack.setAmount(amount);
+        pack.setItems(items);
     }
 
     private void parseInpostId(Package pack, JSONObject p) {
@@ -152,5 +160,16 @@ public class WooWebApi {
             }
         }
         log.warn("Could not find InpostId meta data");
+    }
+
+    public boolean hasMetaId45539(JSONObject item) {
+        JSONArray meta = item.getJSONArray("meta_data");
+        for (int i = 0; i < meta.length(); i++) {
+            JSONObject metaItem = meta.getJSONObject(i);
+            if (metaItem.getInt("id") == 45539) {
+                return true;
+            }
+        }
+        return false;
     }
 }

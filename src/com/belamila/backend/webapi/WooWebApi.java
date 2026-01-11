@@ -96,8 +96,8 @@ public class WooWebApi {
                 || deliveryMethod.contains("Darmowa dostawa: Kurier DPD")
                 || deliveryMethod.contains("Kurier DPD pobranie")) {
             return "DPD Classic";
-        } else if (deliveryMethod.contains("InPost Paczkomat")
-                || deliveryMethod.contains("Darmowa dostawa, paczkomat InPost")) {
+        } else if (deliveryMethod.contains("Paczkomat InPost")
+                || deliveryMethod.contains("Darmowa dostawa: paczkomat InPost")) {
             return "INPOST";
         } else {
             log.warn("Unrecognized delivery method: {}", deliveryMethod);

@@ -145,7 +145,7 @@ public class WooWebApi {
                     .label(item.getString("name"))
                     .quantity(item.getInt("quantity"))
                     .total(item.getDouble("total"))
-                    .isBagRequested(hasMetaId45539(item))
+                    .isBagRequested(hasMetaBagRequest(item))
                     .build());
         }
         pack.setItems(items);
@@ -162,11 +162,11 @@ public class WooWebApi {
         log.warn("Could not find InpostId meta data");
     }
 
-    public boolean hasMetaId45539(JSONObject item) {
+    public boolean hasMetaBagRequest(JSONObject item) {
         JSONArray meta = item.getJSONArray("meta_data");
         for (int i = 0; i < meta.length(); i++) {
             JSONObject metaItem = meta.getJSONObject(i);
-            if (metaItem.getInt("id") == 45539) {
+            if (metaItem.getString("key").equals("torebka")) {
                 return true;
             }
         }

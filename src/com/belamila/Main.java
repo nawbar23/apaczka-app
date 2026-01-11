@@ -52,7 +52,6 @@ public class Main extends Application implements ProgressListener {
         VBox view = new VBox();
         view.getChildren().addAll(label, summary);
 
-
         StackPane root = new StackPane();
         root.getChildren().add(view);
 

@@ -92,7 +92,6 @@ public class Main extends Application implements ProgressListener {
         List<Package> packages = wooWebApi.fetchOrders();
 
         String downloads = System.getProperty("user.home")+ "\\Downloads";
-        pdfPrinter.printSummary(packages, downloads);
 
         AcceptanceWindow.Result result = AcceptanceWindow.verify(packages, inPostWebApi);
         logger.info("Acceptance result: {}, packages: {}", result, packages);
@@ -100,6 +99,7 @@ public class Main extends Application implements ProgressListener {
 
         if (result == AcceptanceWindow.Result.WEB_API) {
             apaczkaWebApi.issueOrdersAndDownloadCards(packages, downloads);
+            pdfPrinter.printSummary(packages, downloads);
             return;
         }
         throw new RuntimeException("To się nie powinno zdażyć");

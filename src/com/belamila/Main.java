@@ -91,14 +91,15 @@ public class Main extends Application implements ProgressListener {
     private void executeLogic() throws Exception {
         List<Package> packages = wooWebApi.fetchOrders();
 
+        String downloads = System.getProperty("user.home")+ "\\Downloads";
+        pdfPrinter.printSummary(packages, downloads);
+
         AcceptanceWindow.Result result = AcceptanceWindow.verify(packages, inPostWebApi);
         logger.info("Acceptance result: {}, packages: {}", result, packages);
         onProgressUpdated("Zaczynamy " + result.toString() + "...\n");
 
         if (result == AcceptanceWindow.Result.WEB_API) {
-            String downloads = System.getProperty("user.home")+ "\\Downloads";
             apaczkaWebApi.issueOrdersAndDownloadCards(packages, downloads);
-            pdfPrinter.printSummary(packages, downloads);
             return;
         }
         throw new RuntimeException("To się nie powinno zdażyć");

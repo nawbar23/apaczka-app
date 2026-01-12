@@ -2,10 +2,7 @@ package com.belamila.backend.pdf;
 
 import com.belamila.model.Package;
 import com.itextpdf.text.*;
-import com.itextpdf.text.pdf.BaseFont;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.*;
 import com.itextpdf.text.pdf.draw.LineSeparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +39,52 @@ public class PdfPrinter {
         }
     }
 
+    // Inner class for page numbering
+    private static class PageNumberEvent extends PdfPageEventHelper {
+        private final Font font;
+        private PdfTemplate total;
+
+        public PageNumberEvent(Font font) {
+            this.font = font;
+        }
+
+        @Override
+        public void onOpenDocument(PdfWriter writer, Document document) {
+            total = writer.getDirectContent().createTemplate(30, 16);
+        }
+
+        @Override
+        public void onEndPage(PdfWriter writer, Document document) {
+            PdfContentByte cb = writer.getDirectContent();
+
+            // Calculate center position
+            float centerX = (document.right() - document.left()) / 2 + document.leftMargin();
+            float footerY = document.bottom() - 10;
+
+            // Add "Strona X z " text
+            String pageText = String.format("Strona %d z ", writer.getPageNumber());
+            Phrase footer = new Phrase(pageText, font);
+
+            ColumnText.showTextAligned(cb, Element.ALIGN_CENTER,
+                    footer,
+                    centerX,
+                    footerY,
+                    0);
+
+            // Add placeholder for total pages (will be filled in onCloseDocument)
+            float textWidth = font.getBaseFont().getWidthPoint(pageText, font.getSize());
+            cb.addTemplate(total, centerX + textWidth / 2, footerY);
+        }
+
+        @Override
+        public void onCloseDocument(PdfWriter writer, Document document) {
+            // Fill in the total number of pages
+            ColumnText.showTextAligned(total, Element.ALIGN_LEFT,
+                    new Phrase(String.valueOf(writer.getPageNumber()), font),
+                    0, 0, 0);
+        }
+    }
+
     public void printSummary(List<Package> packages, String path) {
         String timestamp = new SimpleDateFormat("dd-MM-yyyy HH_mm").format(new Date());
         String fileName = "Podsumawanie paczek " + timestamp + ".pdf";
@@ -50,7 +93,11 @@ public class PdfPrinter {
         Document document = new Document(PageSize.A4, 50, 50, 50, 50);
 
         try {
-            PdfWriter.getInstance(document, Files.newOutputStream(Paths.get(fullPath)));
+            PdfWriter writer = PdfWriter.getInstance(document, Files.newOutputStream(Paths.get(fullPath)));
+
+            // Add page numbering event
+            writer.setPageEvent(new PageNumberEvent(SMALL_FONT));
+
             document.open();
 
             Paragraph date = new Paragraph("Wygenerowano: " +
@@ -59,17 +106,35 @@ public class PdfPrinter {
             date.setSpacingAfter(20);
             document.add(date);
 
+            int maxPageContent = 12;
+            int pageContentSize = 0;
+
             for (int i = 0; i < packages.size(); i++) {
                 Package pkg = packages.get(i);
 
-                if (i > 0) {
+                addPackageInfo(document, pkg);
+                addItemsTable(document, pkg);
+
+                // some size function: order is worth 3 and each product for 1
+                pageContentSize += 3 + pkg.getItems().size();
+
+                // Add new page after every 3 packages (except for the last one)
+                if (pageContentSize > maxPageContent && i < packages.size() - 1) {
+                    document.newPage();
+                    pageContentSize = 0;
+
+                    // Add date header on new page
+                    Paragraph newPageDate = new Paragraph("Wygenerowano: " +
+                            new SimpleDateFormat("dd.MM.yyyy HH:mm").format(new Date()), SMALL_FONT);
+                    newPageDate.setAlignment(Element.ALIGN_RIGHT);
+                    newPageDate.setSpacingAfter(20);
+                    document.add(newPageDate);
+                }
+                else if (i < packages.size() - 1) {
                     document.add(Chunk.NEWLINE);
                     document.add(new LineSeparator());
                     document.add(Chunk.NEWLINE);
                 }
-
-                addPackageInfo(document, pkg);
-                addItemsTable(document, pkg);
             }
 
             logger.info("PDF generated: {}", fullPath);
@@ -110,7 +175,7 @@ public class PdfPrinter {
             String itemLabel = item.getLabel() != null ? item.getLabel() : "-";
             // Dodaj adnotację o torbie jeśli wymagana
             if (item.getIsBagRequested() != null && item.getIsBagRequested()) {
-                itemLabel += " (wymagana torba)";
+                itemLabel += "\nKlient potrzebuje torebeczki";
             }
 
             PdfPCell nameCell = new PdfPCell(new Phrase(itemLabel, NORMAL_FONT));

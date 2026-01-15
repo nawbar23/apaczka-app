@@ -3,7 +3,6 @@ package com.belamila.backend.pdf;
 import com.belamila.model.Package;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
-import com.itextpdf.text.pdf.draw.LineSeparator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,23 +16,21 @@ public class PdfPrinter {
 
     private static final Logger logger = LoggerFactory.getLogger(PdfPrinter.class);
 
-    private static final Font TITLE_FONT;
     private static final Font HEADER_FONT;
+    private static final Font HEADER_NORMAL_FONT;
     private static final Font NORMAL_FONT;
-    private static final Font BOLD_FONT;
     private static final Font SMALL_FONT;
-    private static final Font ITALIC_FONT;
+
+    private static final Integer MAX_PAGE_CONTENT_SIZE = 22;
 
     static {
         try {
             // Użyj wbudowanej czcionki z obsługą polskich znaków
             BaseFont baseFont = BaseFont.createFont("C:/Windows/Fonts/arial.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
-            TITLE_FONT = new Font(baseFont, 18, Font.BOLD);
             HEADER_FONT = new Font(baseFont, 12, Font.BOLD);
+            HEADER_NORMAL_FONT = new Font(baseFont, 12, Font.NORMAL);
             NORMAL_FONT = new Font(baseFont, 10, Font.NORMAL);
-            BOLD_FONT = new Font(baseFont, 10, Font.BOLD);
             SMALL_FONT = new Font(baseFont, 9, Font.NORMAL);
-            ITALIC_FONT = new Font(baseFont, 9, Font.ITALIC);
         } catch (Exception e) {
             throw new RuntimeException("Nie udało się załadować czcionki", e);
         }
@@ -86,54 +83,38 @@ public class PdfPrinter {
     }
 
     public void printSummary(List<Package> packages, String path) {
-        String timestamp = new SimpleDateFormat("dd-MM-yyyy HH_mm").format(new Date());
-        String fileName = "Podsumawanie paczek " + timestamp + ".pdf";
+        Date timestamp = new Date();
+        String fileTimeString = new SimpleDateFormat("dd-MM-yyyy HH_mm").format(timestamp);
+        String fileName = "Podsumawanie paczek " + fileTimeString + ".pdf";
         String fullPath = Paths.get(path, fileName).toString();
 
         Document document = new Document(PageSize.A4, 50, 50, 50, 50);
 
         try {
             PdfWriter writer = PdfWriter.getInstance(document, Files.newOutputStream(Paths.get(fullPath)));
-
-            // Add page numbering event
             writer.setPageEvent(new PageNumberEvent(SMALL_FONT));
 
             document.open();
 
-            Paragraph date = new Paragraph("Wygenerowano: " +
-                    new SimpleDateFormat("dd.MM.yyyy HH:mm").format(new Date()), SMALL_FONT);
-            date.setAlignment(Element.ALIGN_RIGHT);
-            date.setSpacingAfter(20);
-            document.add(date);
-
-            int maxPageContent = 12;
-            int pageContentSize = 0;
-
+            int pageContentSize = 4 + packages.get(0).getItems().size();
             for (int i = 0; i < packages.size(); i++) {
                 Package pkg = packages.get(i);
 
                 addPackageInfo(document, pkg);
                 addItemsTable(document, pkg);
 
-                // some size function: order is worth 3 and each product for 1
-                pageContentSize += 3 + pkg.getItems().size();
+                // last package, not point in computing further
+                if (i >= packages.size() - 1) {
+                    break;
+                }
+
+                Package nextPkg = packages.get(i + 1);
+                pageContentSize += 4 + nextPkg.getItems().size();
 
                 // Add new page after every 3 packages (except for the last one)
-                if (pageContentSize > maxPageContent && i < packages.size() - 1) {
+                if (pageContentSize > MAX_PAGE_CONTENT_SIZE) {
+                    pageContentSize = 4 + nextPkg.getItems().size();
                     document.newPage();
-                    pageContentSize = 0;
-
-                    // Add date header on new page
-                    Paragraph newPageDate = new Paragraph("Wygenerowano: " +
-                            new SimpleDateFormat("dd.MM.yyyy HH:mm").format(new Date()), SMALL_FONT);
-                    newPageDate.setAlignment(Element.ALIGN_RIGHT);
-                    newPageDate.setSpacingAfter(20);
-                    document.add(newPageDate);
-                }
-                else if (i < packages.size() - 1) {
-                    document.add(Chunk.NEWLINE);
-                    document.add(new LineSeparator());
-                    document.add(Chunk.NEWLINE);
                 }
             }
 
@@ -149,18 +130,23 @@ public class PdfPrinter {
 
     private void addPackageInfo(Document document, Package pkg) throws DocumentException {
         Paragraph packageHeader = new Paragraph("Numer zamówienia: " + pkg.getId(), HEADER_FONT);
-        packageHeader.setSpacingAfter(10);
+        packageHeader.setSpacingAfter(2);
         document.add(packageHeader);
 
-        Paragraph label = new Paragraph("Metoda dostawy: " + pkg.getShippingLabel(), BOLD_FONT);
-        label.setSpacingAfter(10);
+        Paragraph label = new Paragraph("Metoda dostawy: " + pkg.getShippingLabel(), HEADER_NORMAL_FONT);
         document.add(label);
+        String fourthDigit = pkg.getPhone().substring(pkg.getPhone().length() - 4, pkg.getPhone().length() - 3);
+        String lastThree = pkg.getPhone().substring(pkg.getPhone().length() - 3);
+        String phoneFormatted = "xxx-xx" + fourthDigit + "-" + lastThree;
+        Paragraph phone = new Paragraph("Numer telefonu: " + phoneFormatted, HEADER_NORMAL_FONT);
+        phone.setSpacingAfter(8);
+        document.add(phone);
     }
 
     private void addItemsTable(Document document, Package pkg) throws DocumentException {
         PdfPTable table = new PdfPTable(3);
         table.setWidthPercentage(100);
-        table.setSpacingAfter(10);
+        table.setSpacingAfter(20);
         table.setWidths(new float[]{6, 2, 2});
 
         // Nagłówki kolumn
@@ -169,7 +155,6 @@ public class PdfPrinter {
         addTableHeader(table, "Cena (PLN)");
 
         // Wiersze z przedmiotami
-        double totalSum = 0.0;
         for (Package.Item item : pkg.getItems()) {
             // Nazwa
             String itemLabel = item.getLabel() != null ? item.getLabel() : "-";
@@ -200,14 +185,10 @@ public class PdfPrinter {
             priceCell.setPadding(5);
             priceCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
             table.addCell(priceCell);
-
-            if (item.getTotal() != null) {
-                totalSum += item.getTotal();
-            }
         }
 
         // Wiersz sumaryczny
-        PdfPCell totalLabelCell = new PdfPCell(new Phrase("SUMA:", HEADER_FONT));
+        PdfPCell totalLabelCell = new PdfPCell(new Phrase("Suma z wysyłką:", HEADER_FONT));
         totalLabelCell.setBorder(Rectangle.BOX);
         totalLabelCell.setPadding(5);
         totalLabelCell.setColspan(2);
@@ -215,7 +196,7 @@ public class PdfPrinter {
         table.addCell(totalLabelCell);
 
         PdfPCell totalValueCell = new PdfPCell(new Phrase(
-                String.format("%.2f", totalSum), HEADER_FONT
+                String.format("%.2f", pkg.getAmount()), HEADER_FONT
         ));
         totalValueCell.setBorder(Rectangle.BOX);
         totalValueCell.setPadding(5);
